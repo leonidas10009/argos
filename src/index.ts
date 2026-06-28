@@ -29,6 +29,12 @@ export { retry } from './utils/retry';
 export { createLogger } from './utils/logger';
 export { takeScreenshot } from './utils/screenshot';
 export { solveAnubisPoW, solveAnubisPoWSync, parseSetCookie } from './utils/anubis';
+export {
+  ScraperError,
+  ScraperTimeoutError,
+  ProviderNotFoundError,
+  EmbedResolveError,
+} from './utils/errors';
 export type {
   ScraperConfig,
   ScrapeTarget,

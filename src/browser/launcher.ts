@@ -90,7 +90,7 @@ export async function createBrowser(config: ScraperConfig): Promise<Browser> {
     );
   }
 
-  const launchOptions: any = {
+  const launchOptions: PuppeteerLaunchOptions = {
     headless: config.headless,
     args: launchArgs,
     timeout: config.timeouts.page,

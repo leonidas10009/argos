@@ -19,6 +19,7 @@ import { takeScreenshot } from './utils/screenshot';
 import { createLogger, getLogger } from './utils/logger';
 import { loadConfig } from './config';
 import { extractServers } from './extractors/ServerListExtractor';
+import { ProviderNotFoundError } from './utils/errors';
 import type {
   ScraperConfig,
   ScrapeTarget,
@@ -68,6 +69,10 @@ export class ScraperEngine {
     this.healthMonitor = getHealthMonitor();
   }
 
+  /**
+   * Initialize the engine — creates browser pool, starts memory watchdog.
+   * Must be called before any scrape operation.
+   */
   async initialize(): Promise<void> {
     const log = getLogger();
     log.info('Initializing ScraperEngine v3.2');
@@ -96,6 +101,11 @@ export class ScraperEngine {
     }, 'ScraperEngine ready');
   }
 
+  /**
+   * Scrape a single URL using the configured strategy cascade (Cheerio → Iframe → Puppeteer).
+   * @param target - URL and optional selectors/timeouts
+   * @returns ScrapeResult with success flag, data, strategy used, and duration
+   */
   async scrape(target: ScrapeTarget): Promise<ScrapeResult> {
     const log = getLogger();
     const startTime = Date.now();
@@ -252,7 +262,7 @@ export class ScraperEngine {
   ): Promise<ProviderResult> {
     const provider = this.providerRegistry.get(providerName);
     if (!provider) {
-      throw new Error(`Provider not found: ${providerName}`);
+      throw new ProviderNotFoundError(providerName);
     }
     return this.router.execute(
       { provider, phase, ...params },

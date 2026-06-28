@@ -206,7 +206,7 @@ export class AutonomousScraper {
       const skeletonSelectors = (this.skeletonDetector as any).skeletonSelectors?.get(domain);
       if (skeletonSelectors && skeletonSelectors.size > 10 && depth > 0) {
         const totalEls = model.elements.length;
-        const skeletonEls = model.elements.filter((e: any) => this.skeletonDetector.isSkeleton(domain, e.selector, e.text)).length;
+        const skeletonEls = model.elements.filter(e => this.skeletonDetector.isSkeleton(domain, e.selector, e.text)).length;
         if (totalEls > 0 && skeletonEls / totalEls > 0.7) {
           log.debug({ url: pageUrl, skelPct: Math.round(skeletonEls / totalEls * 100) }, 'Mostly skeleton, scan-only');
           const quickUrls = await this.extractAllUrls();
@@ -220,9 +220,9 @@ export class AutonomousScraper {
       // Alimentar detector de esqueleto (cross-page dedup)
       this.skeletonDetector.addPageFingerprint(
         domain, pageUrl,
-        model.elements.map((e: any) => e.selector),
-        model.elements.map((e: any) => e.text),
-        model.elements.map((e: any) => e.class),
+        model.elements.map(e => e.selector),
+        model.elements.map(e => e.text),
+        model.elements.map(e => e.class),
       );
 
       // Consultar cadenas conocidas: si esta URL ya sabemos que lleva a servers
@@ -479,11 +479,11 @@ export class AutonomousScraper {
       partial: overTime,
     };
   }
-  private scoreResults(elements: any[], searchTerm: string): { element: any; score: number; sim: number }[] {
+  private scoreResults(elements: RawElement[], searchTerm: string): { element: RawElement; score: number; sim: number }[] {
     const pattern = /ver|watch|play|episodio|episode|capitulo|chapter|pelicula|movie|serie|anime|dragon|naruto|bleach|temporada|season|manga|descarg|download/i;
     return elements
-      .filter((e: any) => (e.type === 'link' || e.type === 'clickable') && e.text.length > 3 && e.attr?.href && !e.attr.href.startsWith('#') && !e.attr.href.startsWith('javascript:'))
-      .map((e: any) => {
+      .filter(e => (e.type === 'link' || e.type === 'clickable') && e.text.length > 3 && e.attr?.href && !e.attr.href.startsWith('#') && !e.attr.href.startsWith('javascript:'))
+      .map(e => {
         let score = 0;
         const sim = textSimilarity(searchTerm, e.text);
         score += sim * 60;
