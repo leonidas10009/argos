@@ -116,15 +116,15 @@ src/
 │
 ├── analysis/                 # Core inteligente (21 módulos)
 │   ├── AutonomousScraper.ts  # Depth-first + quickInvestigate, ContentGoal, progressive search
-│   ├── SmartAnalyzer.ts      # 118 dominios en KB, classifyElementIntent (13 acciones)
+│   ├── SmartAnalyzer.ts      # classifyURL 100% heurístico, classifyElementIntent, KNOWN_SERVER_NAMES
 │   ├── SessionMemory.ts      # Aprendizaje bayesiano + persistencia cross-sesión
 │   ├── ProviderMemory.ts     # Aprendizaje por provider/engine/fase + cross-feed
 │   ├── HealthMonitor.ts      # Scoring bayesiano (s+1)/(t+2), provider scoring
-│   ├── EmbedResolver.ts      # 15+ dominios → URL directa (m3u8/mp4)
+│   ├── EmbedResolver.ts      # Genérico: fetch → regex m3u8/mp4 → iframe recursion
 │   ├── CircuitBreaker.ts     # closed/open/half-open, 5 fallos → 5min
 │   ├── MemoryWatchdog.ts     # Heap 70% → clear caches + prune + GC
 │   ├── StreamNormalizer.ts   # Quality (4K→CAM), language (8 idiomas), priority
-│   ├── ProviderRegistry.ts   # 4 providers built-in + API register/get/import
+│   ├── ProviderRegistry.ts   # Registro declarativo (vacío por defecto, runtime registration)
 │   ├── LazyImageResolver.ts  # Extracción lazy images (cover_url, data-src, bg)
 │   ├── RedirectChainFollower.ts  # Cadenas afiliadas + Cloudflare detect
 │   ├── PaginatedCategoryScraper.ts # Auto-detect paginación + fetch concurrente
