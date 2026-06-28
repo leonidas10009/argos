@@ -359,7 +359,7 @@ export class AutonomousScraper {
         if (this.shouldSkipElement(group.selector, 'group', group.labels.join(','))) continue;
 
         await this.logStep('group', group.selector, `Grupo: ${group.labels.slice(0, 5).join(', ')}`);
-        const isServerGroup = /server|servidor|opcion|mirror|source|video|player|netu|yourupload|mega|okru|streamtape|filemoon|uqload|hqq|swhoi|burstcloud|streamwish|embedwish|nyuu|fembed|cloudvideo|logo|download|descarg|idioma|language/i.test(group.label + group.labels.join(' '));
+        const isServerGroup = /server|servidor|opcion|mirror|source|video|player|descarg|download|idioma|language/i.test(group.label + group.labels.join(' '));
         let groupHadSuccess = false;
 
         for (const item of group.items.slice(0, isServerGroup ? (pageAnalysis.type === 'content' ? 6 : 4) : (pageAnalysis.type === 'content' ? 0 : 2))) {

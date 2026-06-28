@@ -444,7 +444,7 @@ export class HeuristicAnalyzer {
     // Use a raw string evaluation to avoid TypeScript DOM iterator issues
     return this.page.evaluate(`
       (function() {
-        var cards = document.querySelectorAll('.anime-card, [class*="card"], [class*="item"]');
+        var cards = document.querySelectorAll('[class*="card"], [class*="item"]');
         var results = [];
         for (var i = 0; i < Math.min(cards.length, 50); i++) {
           var c = cards[i];
@@ -461,7 +461,7 @@ export class HeuristicAnalyzer {
   private async extractEpisodeList(): Promise<unknown> {
     return this.page.evaluate(`
       (function() {
-        var links = document.querySelectorAll('.episodio-link, [class*="episod"] a, [class*="capitul"] a');
+        var links = document.querySelectorAll('[class*="episod"] a, [class*="capitul"] a');
         var results = [];
         for (var i = 0; i < links.length; i++) {
           var a = links[i];

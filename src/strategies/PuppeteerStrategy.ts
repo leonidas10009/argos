@@ -1,6 +1,5 @@
 import type { Page, Browser } from 'puppeteer';
 import type { ExtractionContext, StrategyResult, ScraperConfig } from '../types';
-import { PageInteractions } from '../interactions/PageInteractions';
 import { getLogger } from '../utils/logger';
 import { takeScreenshot } from '../utils/screenshot';
 
@@ -13,20 +12,11 @@ export async function puppeteerStrategy(
   const log = getLogger();
   log.debug({ url: ctx.url }, 'Puppeteer strategy: starting');
 
-  const interactions = new PageInteractions(page, config.timeouts.page);
-
   try {
     await page.goto(ctx.url, {
       waitUntil: 'domcontentloaded',
       timeout: config.timeouts.page,
     });
-
-    const hasServerList = await interactions.isVisible('#lista-server', 10_000);
-    if (hasServerList) {
-      log.debug('Puppeteer: #lista-server found');
-    } else {
-      log.debug('Puppeteer: #lista-server not found, proceeding');
-    }
 
     try {
       await page.waitForNetworkIdle({ timeout: 5_000 });
@@ -42,7 +32,7 @@ export async function puppeteerStrategy(
       const title = document.title;
       if (title) results['_title'] = title;
 
-      const serverList = document.querySelector('#lista-server');
+      const serverList = document.querySelector('[class*="server" i], [id*="server" i], [class*="player" i], [id*="player" i]');
       if (serverList) {
         const servers: Record<string, unknown>[] = [];
         const children = serverList.children;

@@ -38,7 +38,7 @@ export async function cheerioStrategy(ctx: ExtractionContext): Promise<StrategyR
     const title = $('title').text().trim();
     if (title) data['_title'] = title;
 
-    const serverElements = $('#lista-server > li, #lista-server > div, #lista-server > *');
+    const serverElements = $('[class*="server" i], [id*="server" i], [class*="player" i], [id*="player" i] > li, [class*="server" i] > div');
     if (serverElements.length > 0) {
       const servers: Record<string, unknown>[] = [];
       serverElements.each((_, el) => {
