@@ -8,4 +8,5 @@ logs/
 debug/
 .scraper-memory.json
 .provider-memory.json
+.learned-kb.json
 MEMORY.md
