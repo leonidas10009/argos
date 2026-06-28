@@ -91,7 +91,7 @@ export class PageTypeClassifier {
     const media = elements.filter(e => e.type === 'media');
     if (media.length > 0) { contentScore += 35; signals.push('video-tag'); }
 
-    // Botones de servidor
+    // Botones de servidor o links de descarga/embed
     const serverButtons = clickables.filter(e => /server|servidor|opcion|mirror|source|fuente|calidad|quality|HD|SD|720|1080/i.test(e.text + e.class));
     if (serverButtons.length >= 2) {
       contentScore += 30;
@@ -107,9 +107,18 @@ export class PageTypeClassifier {
     const langSelectors = elements.filter(e => /idioma|language|lang|audio|dub|sub|latino|castellano|japones|english/i.test(e.text + e.class));
     if (langSelectors.length >= 1) { contentScore += 10; signals.push('language-selector'); }
 
-    // URL con patron de episodio
+    // URL con patron de episodio/ver/watch
     if (/episode|episodio|capitulo|chapter|ver\//i.test(urlLower)) {
-      contentScore += 15; signals.push('url:episode');
+      contentScore += 20; signals.push('url:episode');
+    }
+    // URL de pelicula/serie (watch/view/player)
+    if (/\/(ver|watch|play|player|video|pelicula|movie)\//i.test(urlLower)) {
+      contentScore += 25; signals.push('url:watch');
+    }
+    // Links a embeds/players en la pagina
+    const embedLinks = links.filter(l => /embed|player|video|stream|watch|ver/i.test((l.attr.href || '') + l.text));
+    if (embedLinks.length >= 2) {
+      contentScore += 20; signals.push('embed-links');
     }
 
     // === DETECTAR SEARCH ===
@@ -122,6 +131,12 @@ export class PageTypeClassifier {
     }
 
     // === DECIDIR ===
+    // Boost content when URL clearly indicates a watch/view page
+    const isWatchUrl = /\/(ver|watch|play|player|video)\//i.test(urlLower);
+    if (isWatchUrl && contentScore < 50) {
+      contentScore = Math.max(contentScore, 50); // Floor for watch pages
+    }
+
     const scores = [
       { type: 'listing' as PageType, score: listingScore },
       { type: 'detail' as PageType, score: detailScore },
