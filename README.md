@@ -37,6 +37,9 @@ npx tsx src/cli.ts static "https://..."
 # Resolver embeds → URL directa
 npx tsx src/cli.ts resolve-embed "https://streamwish.to/e/abc123"
 
+# Streaming WebSocket en tiempo real
+npx tsx src/cli.ts serve "https://..." -g video
+
 # Batch + health
 npx tsx src/cli.ts batch urls.json -c 5
 npx tsx src/cli.ts health
@@ -71,6 +74,20 @@ const embed = await engine.resolveEmbed('https://streamwish.to/e/abc123');
 // Health & circuitos
 const health = engine.getHealthSummary();
 const circuits = engine.getCircuitStates();
+
+// WebSocket streaming en tiempo real
+const { port, result } = await engine.streamScrape('https://...', {
+  searchTerm: 'naruto', contentGoal: 'video',
+});
+// Conectar a ws://localhost:{port} para eventos en tiempo real
+const data = await result;
+
+// Auto-learning (generado automáticamente tras cada scrape)
+const profile = engine.exportProfile();
+engine.importProfile(profile);
+engine.getSiteProfile('example.com');
+engine.getNavigationMap('example.com');
+engine.generateProviderConfig(result, 'example.com', 'https://example.com');
 
 // Providers
 const providers = engine.getProviders();
@@ -166,6 +183,10 @@ src/
 | **Paginated scraper** | Auto-detecta `_N.html`, `?page=N`, `/page/N/` + fetch concurrente |
 | **Progressive search** | Array `searchTerms[]` con fallback automático (título completo → parcial) |
 | **Deadline + partial** | Resultados parciales si se excede el deadline configurable |
+| **WebSocket streaming** | Eventos en tiempo real (`step`, `url-found`, `complete`) vía `streamScrape()` |
+| **Auto-learning** | `ProfileExporter` genera `ProviderConfig` y `SiteProfile` automáticamente |
+| **Navigation maps** | Grafo de navegación descubierto (nodos, edges, paths) por dominio |
+| **Learned KB** | KB dinámica persistible (`.learned-kb.json`) que crece con cada scrapeo |
 
 ---
 
@@ -173,10 +194,11 @@ src/
 
 | Base | Entradas | Descripción |
 |------|----------|-------------|
-| `URL_DOMAIN_KB` | 118 | Clasificación de dominios: embed, download, CDN, social, tracking, anime |
-| `KNOWN_SERVERS` | 95+ | Mapeo dominio → nombre legible (streamtape→StreamTape, etc.) |
+| `KNOWN_SERVER_NAMES` | 45 | Nombres de servidores conocidos (sin URLs) para reconocimiento por texto |
 | `AFFILIATE_REDIRECT` | 14 | Dominios de redirección afiliados conocidos |
-| Providers built-in | 4 | animejara, tioanime, animeflv, jkanime |
+| `LearnedKB` | Dinámico | Crece con cada scrapeo — dominios, selectores, patrones descubiertos |
+
+> **Toda la clasificación de URLs es heurística**: subdominios, puertos, TLDs, paths, extensiones de archivo, contexto. Sin base de datos de dominios hardcodeada.
 
 ---
 
