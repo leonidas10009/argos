@@ -134,6 +134,7 @@ export class AutonomousScraper extends EventEmitter {
   }
 
   private static AD_DOMAINS = /analytics|track|pixel|beacon|adexchange|cookielaw|cookiepedia|onetrust|doubleclick|googlesyndication|googletagmanager/i;
+  private static STATIC_ASSET = /\.(ico|png|svg|woff2?|css|js|ttf|eot)(\?|$)|favicon\.ico/i;
 
   async investigate(url: string): Promise<SmartScrapeResult> {
     const log = getLogger();
@@ -168,7 +169,7 @@ export class AutonomousScraper extends EventEmitter {
     let pageUrlsLocal: string[] = [];
 
     const diffAndCollect = (urls: string[], source: string, domain: string) => {
-      const fresh = urls.filter(u => u && u !== 'about:blank' && !knownUrls.has(u) && !AutonomousScraper.AD_DOMAINS.test(u) && !AutonomousScraper.AD_DOMAINS.test(this.extractDomain(u)));
+      const fresh = urls.filter(u => u && u !== 'about:blank' && !knownUrls.has(u) && !AutonomousScraper.AD_DOMAINS.test(u) && !AutonomousScraper.AD_DOMAINS.test(this.extractDomain(u)) && !AutonomousScraper.STATIC_ASSET.test(u));
       for (const u of fresh) {
         knownUrls.add(u);
         pageUrlsLocal.push(u);
@@ -242,6 +243,30 @@ export class AutonomousScraper extends EventEmitter {
       log.info({ type: pageAnalysis.type, conf: pageAnalysis.confidence, signals: pageAnalysis.signals.slice(0, 3).join(', ') }, 'Page classified');
 
       // === ESTRATEGIA POR TIPO DE PAGINA ===
+
+      // Reader page detection: chapter/reader UI with prev/next navigation
+      const isReaderPage = /\/chapter\/|\/reader\/|\/leer\/|\/capitulo\/|\/episodio\/|\/ver\//i.test(pageUrl)
+        && /anterior|siguiente|prev|next|recargar|reload|download|descarg/i.test(model.elements.map(e => e.text).join(' '));
+      if (isReaderPage) {
+        log.debug({ url: pageUrl }, 'Reader page detected — extraction mode');
+        // Extract all visible content URLs (images, iframes, scripts)
+        const readerUrls = await this.extractAllUrls();
+        diffAndCollect(readerUrls, 'reader-content', pageUrl);
+        // Look for pagination within the reader (page-2.html, -2.html, ?page=2)
+        const readerPagination = pageUrlsLocal.filter(u =>
+          /-\d+\.html|page=\d+|#page=\d+/i.test(u) && !visitedPages.has(u)
+        );
+        for (const nextPage of readerPagination.slice(0, 3)) {
+          if (Date.now() - start > MAX_TIME) break;
+          try {
+            await explorePage(nextPage, undefined, depth + 1);
+            visitedPages.add(nextPage.split('?')[0]!.replace(/\/\d+$/, '/X'));
+            await this.dynamic.navigate(pageUrl, { timeout: 10000 });
+          } catch { continue; }
+        }
+        return; // Reader: extract, don't explore other content
+      }
+
       if ((pageAnalysis.type as string) === 'content') {
         // Pagina de contenido: buscar servers con network interception
         const contentGroups = this.detectGroups(model.elements);
@@ -374,8 +399,8 @@ export class AutonomousScraper extends EventEmitter {
         if (Date.now() - start > MAX_TIME) break;
         if (groupFails >= 2) break;
 
-        // Saltar menus de navegacion (son iguales en todas las paginas)
-        const isNavMenu = /nav|menu|header|footer/i.test(group.label + group.selector);
+        // Saltar menus de navegacion y controles de reader (Anterior/Siguiente)
+        const isNavMenu = /nav|menu|header|footer|anterior|siguiente|prev|previous|next|back/i.test(group.label + group.selector);
         if (isNavMenu) continue;
 
         if (this.shouldSkipElement(group.selector, 'group', group.labels.join(','))) continue;
@@ -433,6 +458,7 @@ export class AutonomousScraper extends EventEmitter {
             if (AutonomousScraper.AD_DOMAINS.test(u)) return false;
             const d = this.extractDomain(u);
             if (d === domain && /^\/(login|emision|catalogo|comunidad|peticiones|inicio|registro|profile|cuenta)/i.test(new URL(u).pathname)) return false;
+            if (AutonomousScraper.STATIC_ASSET.test(u)) return false;
             return (cls.isContainer && (cls.type === 'embed' || cls.type === 'navigation'))
               || this.memory.isKnownContainerDomain(d);
           })
