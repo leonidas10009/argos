@@ -23,6 +23,7 @@ export { HealthMonitor, getHealthMonitor } from './analysis/HealthMonitor';
 export { LazyImageResolver } from './analysis/LazyImageResolver';
 export { RedirectChainFollower, AFFILIATE_REDIRECT_DOMAINS } from './analysis/RedirectChainFollower';
 export { PaginatedCategoryScraper } from './analysis/PaginatedCategoryScraper';
+export { BaseSiteAdapter } from './analysis/BaseSiteAdapter';
 export { Router } from './engines/Router';
 export { StreamPipeline } from './engines/StreamPipeline';
 export { CrossSourceMatcher } from './engines/CrossSourceMatcher';
@@ -108,3 +109,9 @@ export type {
   SearchProvider,
   CrossSourceOptions,
 } from './engines/CrossSourceMatcher';
+export type {
+  SitePageType,
+  SiteIdentifiers,
+  SitePageAnalysis,
+  UrlPatterns,
+} from './analysis/BaseSiteAdapter';
