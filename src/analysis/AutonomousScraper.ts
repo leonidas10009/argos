@@ -1,4 +1,5 @@
 import type { Page } from 'puppeteer';
+import { EventEmitter } from 'node:events';
 import { getLogger } from '../utils/logger';
 import { SmartAnalyzer, KNOWN_SERVER_NAMES } from './SmartAnalyzer';
 import { DebugViewer } from './DebugViewer';
@@ -79,7 +80,7 @@ export interface AutonomousScraperOptions {
   deadlineMs?: number;
 }
 
-export class AutonomousScraper {
+export class AutonomousScraper extends EventEmitter {
   private page: Page;
   private visited = new Set<string>();
   private urlCollector: { url: string; category: string; source: string }[] = [];
@@ -105,6 +106,7 @@ export class AutonomousScraper {
   private skeletonDetector = new SkeletonDetector();
 
   constructor(page: Page, options?: AutonomousScraperOptions) {
+    super();
     this.page = page;
     if (options?.maxRequests) this.maxRequests = options.maxRequests;
     if (options?.searchTerm) this.searchTerm = options.searchTerm;
@@ -171,6 +173,10 @@ export class AutonomousScraper {
         knownUrls.add(u);
         pageUrlsLocal.push(u);
         this.urlCollector.push({ url: u, category: 'unknown', source: source + ' | ' + domain });
+        // Emit for streaming if it looks like a server URL
+        if (/embed|player|stream|video|server|download|descarg/i.test(u + source)) {
+          this.emit('url-found', { url: u, source, domain });
+        }
       }
       return fresh;
     };
@@ -472,10 +478,18 @@ export class AutonomousScraper {
     const model = this.cachedModel || await this.buildModel();
     const streams = this.buildStreamList(serverCatalog);
     const overTime = Date.now() - start > MAX_TIME;
+    const findings = this.categorizeUrls();
+
+    // Emit completion event for WebSocket streaming
+    this.emit('complete', {
+      url, title, duration, serverCatalog, streams, findings,
+      stepsCount: this.steps.length, partial: overTime,
+    });
+
     return {
       url, title,
       steps: this.steps, serverCatalog, streams,
-      findings: this.categorizeUrls(),
+      findings,
       model: { roles: [...new Set(model.elements.map(e => e.type))], totalElements: model.elements.length, interactions: this.stepCount },
       durationMs: duration,
       partial: overTime,
@@ -1144,6 +1158,9 @@ export class AutonomousScraper {
     if (this.debug && /group|chain|dive|detail|deep/i.test(action)) {
       await this.debug.capture(this.page, this.stepCount, action, target, reasoning, []);
     }
+
+    // Emit real-time event for WebSocket streaming
+    this.emit('step', { step: this.stepCount, action, target, reasoning });
   }
 
   private finalizeResult(url: string, reason: string, start: number): SmartScrapeResult {

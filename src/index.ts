@@ -39,6 +39,7 @@ export { AdaptiveThrottle } from './utils/adaptive-throttle';
 export { Benchmark } from './utils/benchmark';
 export { CdnImageCache } from './utils/cdn-cache';
 export { AsyncLock } from './utils/async-lock';
+export { ScrapeServer } from './utils/scrape-server';
 export {
   ScraperError,
   ScraperTimeoutError,

@@ -192,6 +192,35 @@ program
   });
 
 program
+  .command('serve <url>')
+  .description('Escrapeo con streaming WebSocket en tiempo real')
+  .option('-p, --port <n>', 'Puerto del servidor WebSocket', '0')
+  .option('-q, --query <term>', 'Termino de busqueda')
+  .option('-g, --goal <type>', 'Tipo de contenido', 'auto')
+  .option('--no-headless', 'Mostrar navegador')
+  .option('--log-level <level>', 'Log level', 'info')
+  .action(async (url, options) => {
+    const engine = new ScraperEngine({
+      headless: options.headless,
+      logLevel: options.logLevel as LogLevel,
+    });
+    try {
+      await engine.initialize();
+      const { port, result } = await engine.streamScrape(url, {
+        port: parseInt(options.port),
+        searchTerm: options.query,
+        contentGoal: options.goal,
+      });
+      console.log(`WebSocket server: ws://localhost:${port}`);
+      console.log('Waiting for scrape to complete...');
+      const data = await result;
+      console.log(JSON.stringify(data, null, 2));
+    } finally {
+      await engine.shutdown();
+    }
+  });
+
+program
   .command('stats')
   .description('Muestra estadisticas del pool de browsers y memoria')
   .action(async () => {

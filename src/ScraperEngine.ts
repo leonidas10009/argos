@@ -23,6 +23,7 @@ import { createLogger, getLogger } from './utils/logger';
 import { loadConfig } from './config';
 import { extractServers } from './extractors/ServerListExtractor';
 import { ProviderNotFoundError } from './utils/errors';
+import { ScrapeServer } from './utils/scrape-server';
 import type {
   ScraperConfig,
   ScrapeTarget,
@@ -363,6 +364,51 @@ export class ScraperEngine {
    * @param options.debug - Enable visual debug reports with screenshots
    * @returns SmartScrapeResult with serverCatalog, streams (priority-sorted), findings, and partial flag
    */
+  /**
+   * Stream scrape progress via WebSocket in real-time.
+   * Starts an HTTP server and runs the autonomous scrape, broadcasting events.
+   * @returns The server port and the scrape result promise.
+   *
+   * @example
+   * const { port, result } = await engine.streamScrape(url, options);
+   * // Connect to ws://localhost:{port} to receive real-time events
+   * const data = await result; // Final result
+   */
+  async streamScrape(url: string, options?: AutonomousScraperOptions & { port?: number }): Promise<{ port: number; server: ScrapeServer; result: Promise<SmartScrapeResult> }> {
+    if (!this.pool) throw new Error('Engine not initialized. Call initialize() first.');
+
+    const server = new ScrapeServer(options?.port || 0);
+    const port = await server.start();
+
+    const result = (async () => {
+      const log = getLogger();
+      const instance = await this.pool!.acquire();
+      const page = await createPage(instance.browser, this.config);
+      if (this.config.blockResources) await setupResourceBlocking(page);
+
+      try {
+        const effectiveOptions: AutonomousScraperOptions = {
+          deadlineMs: this.config.streamDeadlineMs, ...options,
+        };
+        const scraper = new AutonomousScraper(page, effectiveOptions);
+
+        // Wire scraper events → WebSocket broadcast
+        scraper.on('step', (data) => server.broadcast('step', data));
+        scraper.on('url-found', (data) => server.broadcast('url-found', data));
+        scraper.on('complete', (data) => server.broadcast('complete', data));
+        scraper.on('error', (err) => server.broadcast('error', { error: (err as Error).message }));
+
+        const scrapeResult = await scraper.investigate(url);
+        return scrapeResult;
+      } finally {
+        try { await page.close(); } catch { /* ok */ }
+        await this.pool!.release(instance);
+      }
+    })();
+
+    return { port, server, result };
+  }
+
   async autonomousScrape(url: string, options?: AutonomousScraperOptions) {
     if (!this.pool) throw new Error('Engine not initialized. Call initialize() first.');
 
