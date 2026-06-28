@@ -35,7 +35,7 @@ interface ActionResult {
   newState?: PageModel;
 }
 
-interface ExplorationStep {
+export interface ExplorationStep {
   step: number;
   action: string;
   target: string;

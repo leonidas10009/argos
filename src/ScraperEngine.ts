@@ -10,6 +10,9 @@ import { StreamNormalizer } from './analysis/StreamNormalizer';
 import { ProviderRegistry, getProviderRegistry } from './analysis/ProviderRegistry';
 import { getProviderMemory } from './analysis/ProviderMemory';
 import { HealthMonitor, getHealthMonitor } from './analysis/HealthMonitor';
+import { ProfileExporter } from './analysis/ProfileExporter';
+import { ProfileBuilder } from './analysis/ProfileBuilder';
+import { getLearnedKB } from './analysis/LearnedKnowledgeBase';
 import { PageInteractions } from './interactions/PageInteractions';
 import { ProxyRotator } from './proxy/ProxyRotator';
 import { cheerioStrategy, iframeStrategy, puppeteerStrategy } from './strategies';
@@ -34,6 +37,8 @@ import type {
   CircuitState,
 } from './types';
 import type { BrowserInstance } from './types';
+import type { SmartScrapeResult } from './analysis/AutonomousScraper';
+import type { ExportableProfile } from './analysis/learning-types';
 import type { Page } from 'puppeteer';
 
 export class ScraperEngine {
@@ -47,6 +52,7 @@ export class ScraperEngine {
   private router: Router;
   private providerRegistry: ProviderRegistry;
   private healthMonitor: HealthMonitor;
+  private profileExporter: ProfileExporter;
 
   constructor(overrides?: Partial<ScraperConfig>) {
     this.config = loadConfig(overrides);
@@ -67,6 +73,7 @@ export class ScraperEngine {
     this.router = new Router(this.circuitBreaker);
     this.providerRegistry = getProviderRegistry();
     this.healthMonitor = getHealthMonitor();
+    this.profileExporter = new ProfileExporter();
   }
 
   /**
@@ -265,6 +272,47 @@ export class ScraperEngine {
     return this.providerRegistry.getActive();
   }
 
+  /** Export all learned profiles, providers, navigation maps, and KB to portable JSON. */
+  exportProfile(path?: string): ExportableProfile {
+    const profile = this.profileExporter.export();
+    if (path) this.profileExporter.saveToFile(path);
+    return profile;
+  }
+
+  /** Import a previously exported profile (providers, site profiles, KB). */
+  importProfile(data: ExportableProfile): void {
+    this.profileExporter.import(data);
+    // Register imported providers
+    for (const p of data.providers || []) {
+      this.providerRegistry.register(p);
+    }
+  }
+
+  /** Load profile from a JSON file. */
+  loadProfile(path: string): boolean {
+    return this.profileExporter.loadFromFile(path);
+  }
+
+  /** Get site profile learned for a domain. */
+  getSiteProfile(domain: string) {
+    return this.profileExporter.getProfile(domain);
+  }
+
+  /** Get navigation map learned for a domain. */
+  getNavigationMap(domain: string) {
+    return this.profileExporter.getNavigationMap(domain);
+  }
+
+  /** Generate a ProviderConfig from a scrape result. */
+  generateProviderConfig(result: SmartScrapeResult, domain: string, baseUrl: string) {
+    return new ProfileBuilder().generateProviderConfig(result, domain, baseUrl);
+  }
+
+  /** Get the learned knowledge base (organic domain discoveries). */
+  getLearnedKnowledgeBase() {
+    return getLearnedKB().getData();
+  }
+
   async executeProvider(
     providerName: string,
     phase: 'search' | 'videos',
@@ -366,6 +414,12 @@ export class ScraperEngine {
           this.streamNormalizer.deduplicate(enrichedStreams),
         );
       }
+
+      // Auto-learning: feed results to ProfileExporter for future sessions
+      try {
+        const domain = new URL(url).hostname;
+        this.profileExporter.processResult(result, domain, url);
+      } catch { /* non-critical */ }
 
       return result;
     } catch (err) {

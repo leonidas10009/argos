@@ -24,6 +24,10 @@ export { LazyImageResolver } from './analysis/LazyImageResolver';
 export { RedirectChainFollower, AFFILIATE_REDIRECT_DOMAINS } from './analysis/RedirectChainFollower';
 export { PaginatedCategoryScraper } from './analysis/PaginatedCategoryScraper';
 export { BaseSiteAdapter } from './analysis/BaseSiteAdapter';
+export { ProfileBuilder } from './analysis/ProfileBuilder';
+export { NavigationMapper } from './analysis/NavigationMapper';
+export { LearnedKB, getLearnedKB, resetLearnedKB } from './analysis/LearnedKnowledgeBase';
+export { ProfileExporter } from './analysis/ProfileExporter';
 export { Router } from './engines/Router';
 export { StreamPipeline } from './engines/StreamPipeline';
 export { CrossSourceMatcher } from './engines/CrossSourceMatcher';
@@ -76,6 +80,7 @@ export type {
 export type {
   SmartScrapeResult,
   ServerCatalog,
+  ExplorationStep,
   AutonomousScraperOptions,
   ContentGoal,
 } from './analysis/AutonomousScraper';
@@ -119,3 +124,13 @@ export type {
   SitePageAnalysis,
   UrlPatterns,
 } from './analysis/BaseSiteAdapter';
+export type {
+  SiteProfile,
+  NavigationMap,
+  NavigationNode,
+  LearnedKnowledgeBase,
+  LearnedDomainEntry,
+  LearnedSelector,
+  LearnedPattern,
+  ExportableProfile,
+} from './analysis/learning-types';
