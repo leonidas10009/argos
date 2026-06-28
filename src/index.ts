@@ -31,6 +31,10 @@ export { retry } from './utils/retry';
 export { createLogger } from './utils/logger';
 export { takeScreenshot } from './utils/screenshot';
 export { solveAnubisPoW, solveAnubisPoWSync, parseSetCookie } from './utils/anubis';
+export { AdaptiveThrottle } from './utils/adaptive-throttle';
+export { Benchmark } from './utils/benchmark';
+export { CdnImageCache } from './utils/cdn-cache';
+export { AsyncLock } from './utils/async-lock';
 export {
   ScraperError,
   ScraperTimeoutError,

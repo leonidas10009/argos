@@ -1,6 +1,6 @@
 {
   "name": "argos",
-  "version": "3.4.0",
+  "version": "3.4.1",
   "description": "Argos — Motor de escrapeo inteligente híbrido (Cheerio → Iframe → Puppeteer) con pool de browsers, stealth, proxy rotativo, memoria bayesiana y pipeline multi-provider",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -35,6 +35,19 @@
     "video"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leonidas10009/argos.git"
+  },
+  "homepage": "https://github.com/leonidas10009/argos#readme",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
   "dependencies": {
     "@sparticuz/chromium": "^149.0.0",
     "cheerio": "^1.0.0",
