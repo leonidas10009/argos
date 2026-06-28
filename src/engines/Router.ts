@@ -81,7 +81,7 @@ export class Router {
     this.memory.recordEngineAttempt(providerName, 'all' as EngineName, phase, false, 0, 0);
     return {
       provider: providerName,
-      engine: engineOrder[0],
+      engine: engineOrder[0]!,
       phase,
       success: false,
       durationMs: 0,

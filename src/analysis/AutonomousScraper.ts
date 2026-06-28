@@ -185,7 +185,7 @@ export class AutonomousScraper {
       const effectiveMaxDepth = serverCount >= 3 ? Math.min(MAX_DEPTH, depth + 1) : MAX_DEPTH;
       if (depth > effectiveMaxDepth) return;
       // Fingerprint agresivo: quitar todos los query params, solo path
-      let fp = pageUrl.split('?')[0].replace(/\/+$/, '');
+      let fp = pageUrl.split('?')[0]!.replace(/\/+$/, '');
       // Normalizar IDs numericos en la URL
       fp = fp.replace(/\/\d+$/, '/X');
       if (visitedPages.has(fp)) return;
@@ -281,7 +281,7 @@ export class AutonomousScraper {
                 await this.logStep('infer', candidateUrl, `Inferido: ${candidateUrl.slice(0, 50)}`);
                 try {
                   await explorePage(candidateUrl, undefined, depth + 1);
-                  visitedPages.add(candidateUrl.split('?')[0].replace(/\/\d+$/, '/X'));
+                  visitedPages.add(candidateUrl.split('?')[0]!.replace(/\/\d+$/, '/X'));
                   await this.dynamic.navigate(pageUrl, { timeout: 10000 });
                   await this.buildModel();
                   searchSucceeded = true;
@@ -318,7 +318,7 @@ export class AutonomousScraper {
                 }
               }
 
-              const bestSim = results[0]?.sim || 0;
+              const bestSim = results[0]!?.sim || 0;
               if (results.length === 0 || bestSim < 0.3) {
                 const candidateUrls = this.ai.inferCandidateUrls(pageUrls, st, pageUrl);
                 if (candidateUrls.length > 0) {
@@ -329,7 +329,7 @@ export class AutonomousScraper {
                     await this.logStep('infer', candidateUrl, `Inferido: ${candidateUrl.slice(0, 50)}`);
                     try {
                       await explorePage(candidateUrl, undefined, depth + 1);
-                      visitedPages.add(candidateUrl.split('?')[0].replace(/\/\d+$/, '/X'));
+                      visitedPages.add(candidateUrl.split('?')[0]!.replace(/\/\d+$/, '/X'));
                       await this.dynamic.navigate(pageUrl, { timeout: 10000 });
                       await this.buildModel();
                       searchSucceeded = true;
@@ -341,7 +341,7 @@ export class AutonomousScraper {
           }
         }
         // Merge searchTerm state for the rest of explore
-        searchTerm = searchSucceeded ? effectiveSearchTerms[0] : undefined;
+        searchTerm = searchSucceeded ? effectiveSearchTerms[0]! : undefined;
       }
 
       const currentModel = await this.buildModel();
@@ -374,7 +374,7 @@ export class AutonomousScraper {
             try {
               await explorePage(href, undefined, depth + 1);
               // Marcar como visitado para no redescubrir
-              visitedPages.add(href.split('?')[0].replace(/\/\d+$/, '/X'));
+              visitedPages.add(href.split('?')[0]!.replace(/\/\d+$/, '/X'));
               await this.dynamic.navigate(pageUrl, { timeout: 10000 });
               await this.buildModel();
               groupHadSuccess = true;
@@ -425,7 +425,7 @@ export class AutonomousScraper {
           if (visitedPages.has(containerUrl)) continue;
           await this.logStep('dive', this.extractDomain(containerUrl), `Deep: ${containerUrl.slice(0, 50)}`);
           try {
-            await explorePage(containerUrl, undefined, depth + 1); visitedPages.add(containerUrl.split("?")[0].replace(/\/\d+$/, "/X")); await this.dynamic.navigate(pageUrl, { timeout: 10000 });
+            await explorePage(containerUrl, undefined, depth + 1); visitedPages.add(containerUrl.split("?")[0]!.replace(/\/\d+$/, "/X")); await this.dynamic.navigate(pageUrl, { timeout: 10000 });
             await this.buildModel();
           } catch { continue; }
         }
@@ -580,14 +580,14 @@ export class AutonomousScraper {
       const uniqueClasses = [...new Set(classes)];
 
       if (uniqueClasses.length <= 3 && siblings.length >= 2 && siblings.length <= 20) {
-        const groupLabel = siblings[0].parent || 'options';
+        const groupLabel = siblings[0]!.parent || 'options';
         const skipWords = /login|iniciar|regist|cuenta|discord|telegram|facebook|instagram|chat|cookie|privac|dmca/i;
 
         const validItems = siblings.filter(s => !skipWords.test(s.text));
         if (validItems.length < 2) continue;
 
         groups.push({
-          selector: validItems[0].parent || 'body',
+          selector: validItems[0]!.parent || 'body',
           label: groupLabel,
           count: validItems.length,
           labels: validItems.map(s => s.text.slice(0, 30)),
@@ -957,7 +957,7 @@ export class AutonomousScraper {
       const list = servers.get(serverName)!;
       const cls = this.ai.classifyURL(entry.url, entry.source);
       const type = cls.type === 'unknown' ? 'other' : cls.type;
-      const label = entry.source.split('|')[0].trim().slice(0, 40);
+      const label = entry.source.split('|')[0]!.trim().slice(0, 40);
 
       const normalized = this.streamNormalizer.normalize(entry.url, [label, entry.source]);
 
@@ -1019,7 +1019,7 @@ export class AutonomousScraper {
       const sorted = [...params.entries()].sort().map(([k, v]) => k + '=' + v).join('&');
       return u.hostname.replace('www.', '') + u.pathname + '?' + sorted;
     } catch {
-      return url.replace(/https?:\/\//, '').split('?')[0].slice(0, 60);
+      return url.replace(/https?:\/\//, '').split('?')[0]!.slice(0, 60);
     }
   }
 
@@ -1107,7 +1107,7 @@ export class AutonomousScraper {
     if (/\/descargar\/|\/download\/|\.zip|\.rar|\.pdf/i.test(urls)) signals.push({ goal: 'download', score: 20 });
 
     signals.sort((a, b) => b.score - a.score);
-    return signals[0]?.goal || 'video';
+    return signals[0]!?.goal || 'video';
   }
 
   private getContentFilter(): RegExp {

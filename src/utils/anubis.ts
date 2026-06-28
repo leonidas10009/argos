@@ -34,7 +34,7 @@ export async function solveAnubisPoW(
       if (bytes[i] !== 0) valid = false;
     }
 
-    if (valid && nibbleCheck && (bytes[zeroBytes] & 0xf0) !== 0) {
+    if (valid && nibbleCheck && (bytes[zeroBytes]! & 0xf0) !== 0) {
       valid = false;
     }
 
@@ -81,7 +81,7 @@ export function solveAnubisPoWSync(
       if (bytes[i] !== 0) valid = false;
     }
 
-    if (valid && nibbleCheck && (bytes[zeroBytes] & 0xf0) !== 0) {
+    if (valid && nibbleCheck && (bytes[zeroBytes]! & 0xf0) !== 0) {
       valid = false;
     }
 

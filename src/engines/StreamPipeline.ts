@@ -64,9 +64,9 @@ export class StreamPipeline {
       );
 
       for (let i = 0; i < settled.length; i++) {
-        const r = settled[i];
+        const r = settled[i]!;
         if (r.status === 'fulfilled' && Array.isArray(r.value) && r.value.length > 0) {
-          rawResults.push({ provider: chunk[i].name, results: r.value });
+          rawResults.push({ provider: chunk[i]!.name, results: r.value });
         }
       }
     }

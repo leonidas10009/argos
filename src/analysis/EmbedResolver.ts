@@ -152,7 +152,7 @@ export class EmbedResolver {
     const dataMatch = html.match(/const\s+_0x[a-f]*\s*=\s*(\{[^}]+\})/);
     if (dataMatch) {
       try {
-        const obj = JSON.parse(dataMatch[1].replace(/'/g, '"').replace(/(\w+):/g, '"$1":'));
+        const obj = JSON.parse(dataMatch[1]!!.replace(/'/g, '"').replace(/(\w+):/g, '"$1":'));
         const keys = Object.values(obj);
         for (const key of keys) {
           if (typeof key === 'string' && key.length > 20 && /^[A-Za-z0-9+/=]+$/.test(key) && !key.startsWith('http')) {
@@ -162,32 +162,32 @@ export class EmbedResolver {
       } catch { /* continue */ }
     }
     const m3u8 = html.match(/https?:\/\/[^"'\s<>]+\.m3u8[^"'\s<>]*/i);
-    if (m3u8) return m3u8[0];
+    if (m3u8) return m3u8[0]!!;
     const mp4 = html.match(/https?:\/\/[^"'\s<>]+\.mp4[^"'\s<>]*/i);
-    if (mp4) return mp4[0];
+    if (mp4) return mp4[0]!!;
     return null;
   }
 
   private async resolveFilemoon(html: string, _url: string): Promise<string | null> {
     const m3u8 = html.match(/https?:\/\/[^"'\s<>]+\.m3u8[^"'\s<>]*/i);
-    if (m3u8) return m3u8[0];
+    if (m3u8) return m3u8[0]!!;
     const mp4 = html.match(/https?:\/\/[^"'\s<>]+\.mp4[^"'\s<>]*/i);
-    if (mp4) return mp4[0];
+    if (mp4) return mp4[0]!!;
     const jsMatch = html.match(/"file"\s*:\s*"([^"]+\.(?:m3u8|mp4)[^"]*)"/i);
-    if (jsMatch) return jsMatch[1];
+    if (jsMatch) return jsMatch[1]!;
     return null;
   }
 
   private async resolveDoodstream(html: string, url: string): Promise<string | null> {
     const m3u8 = html.match(/https?:\/\/[^"'\s<>]+\.m3u8[^"'\s<>]*/i);
-    if (m3u8) return m3u8[0];
+    if (m3u8) return m3u8[0]!!;
     const passMatch = html.match(/\$.get\('([^']+pass_md5[^']*)'/i);
     if (passMatch) {
-      const tokenUrl = passMatch[1].startsWith('http') ? passMatch[1] : new URL(passMatch[1], url).href;
+      const tokenUrl = passMatch[1]!.startsWith('http') ? passMatch[1]! : new URL(passMatch[1]!, url).href;
       const tokenHtml = await fetchHtml(tokenUrl, url);
       if (tokenHtml) {
         const m = tokenHtml.match(/https?:\/\/[^"'\s<>]+\.(?:m3u8|mp4)[^"'\s<>]*/i);
-        if (m) return m[0];
+        if (m) return m[0]!!;
         const parts = tokenHtml.split(' ');
         for (const p of parts) {
           if (p.match(/\.(?:m3u8|mp4)/i) && p.includes('http')) return p.replace(/^[^h]*/, '').trim();
@@ -195,44 +195,44 @@ export class EmbedResolver {
       }
     }
     const mp4 = html.match(/https?:\/\/[^"'\s<>]+\.mp4[^"'\s<>]*/i);
-    if (mp4) return mp4[0];
+    if (mp4) return mp4[0]!!;
     return null;
   }
 
   private async resolveMixdrop(html: string, _url: string): Promise<string | null> {
     const refMatch = html.match(/MDCore\.ref\s*=\s*["']([^"']+)["']/);
     if (refMatch) {
-      const ref = refMatch[1];
+      const ref = refMatch[1]!;
       const vHtml = await fetchHtml('https://mxcontent.com/e/' + ref, _url);
       if (vHtml) {
         const m = vHtml.match(/https?:\/\/[^"'\s<>]+\.(?:m3u8|mp4)[^"'\s<>]*/i);
-        if (m) return m[0];
+        if (m) return m[0]!!;
       }
     }
     const wurlMatch = html.match(/"poster"\s*:\s*"[^"]+","wurl"\s*:\s*"([^"]+)"/);
-    if (wurlMatch) return wurlMatch[1].replace(/\\\//g, '/');
+    if (wurlMatch) return wurlMatch[1]!.replace(/\\\//g, '/');
     const m3u8 = html.match(/https?:\/\/[^"'\s<>]+\.m3u8[^"'\s<>]*/i);
-    if (m3u8) return m3u8[0];
+    if (m3u8) return m3u8[0]!!;
     return null;
   }
 
   private async resolveVoe(html: string, _url: string): Promise<string | null> {
     const mp4 = html.match(/https?:\/\/[^"'\s<>]+\.mp4[^"'\s<>]*/i);
-    if (mp4) return mp4[0];
+    if (mp4) return mp4[0]!!;
     const m3u8 = html.match(/https?:\/\/[^"'\s<>]+\.m3u8[^"'\s<>]*/i);
-    if (m3u8) return m3u8[0];
+    if (m3u8) return m3u8[0]!!;
     const evalMatch = html.match(/<script>\s*tm\s*=\s*('(?:\\.|[^'\\])*')/);
     if (evalMatch) {
-      try { const s = evalMatch[1].slice(1, -1); const m = s.match(/https?:\/\/[^"'\\]+\.(?:m3u8|mp4)[^"'\\]*/); if (m) return m[0]; } catch { /* continue */ }
+      try { const s = evalMatch[1]!.slice(1, -1); const m = s.match(/https?:\/\/[^"'\\]+\.(?:m3u8|mp4)[^"'\\]*/); if (m) return m[0]!!; } catch { /* continue */ }
     }
     return null;
   }
 
   private async resolveVidhide(html: string, _url: string): Promise<string | null> {
     const m3u8 = html.match(/https?:\/\/[^"'\s<>]+\.m3u8[^"'\s<>]*/i);
-    if (m3u8) return m3u8[0];
+    if (m3u8) return m3u8[0]!!;
     const mp4 = html.match(/https?:\/\/[^"'\s<>]+\.mp4[^"'\s<>]*/i);
-    if (mp4) return mp4[0];
+    if (mp4) return mp4[0]!!;
     return null;
   }
 
@@ -240,14 +240,14 @@ export class EmbedResolver {
     const jsMatch = html.match(/data-options="([^"]+)"/);
     if (jsMatch) {
       try {
-        const opts = JSON.parse(jsMatch[1].replace(/&quot;/g, '"'));
+        const opts = JSON.parse(jsMatch[1]!.replace(/&quot;/g, '"'));
         const vLink = opts.flashvars && opts.flashvars.metadataUrl || '';
         if (vLink) {
           const vHtml = await fetchHtml(vLink, 'https://ok.ru/');
           if (vHtml) {
             const js = vHtml.match(/<script>\s*tm\s*=\s*('(?:\\.|[^'\\])*')/);
             if (js) {
-              try { const s = js[1].slice(1, -1); const m = s.match(/https?:\/\/[^"'\\]+\.(?:m3u8|mp4)[^"'\\]*/); if (m) return m[0]; } catch { /* continue */ }
+              try { const s = js[1]!.slice(1, -1); const m = s.match(/https?:\/\/[^"'\\]+\.(?:m3u8|mp4)[^"'\\]*/); if (m) return m[0]!; } catch { /* continue */ }
             }
             const m3 = vHtml.match(/https?:\/\/[^"'\s<>]+\.m3u8[^"'\s<>]*/i);
             if (m3) return m3[0];
@@ -260,21 +260,21 @@ export class EmbedResolver {
 
   private async resolveStreamtape(html: string, url: string): Promise<string | null> {
     const ideoDiv = html.match(/id="ideoolink"[^>]*>([^<]+)<\/div>/);
-    if (ideoDiv && ideoDiv[1]) {
-      let path = ideoDiv[1].trim();
+    if (ideoDiv && ideoDiv[1]!) {
+      let path = ideoDiv[1]!.trim();
       if (path.startsWith('/')) path = path.substring(1);
       const fullUrl = 'https://' + path + '&stream=1';
       const vHtml = await fetchHtml(fullUrl, url);
       if (vHtml) {
         const m = vHtml.match(/https?:\/\/[^"'\s<>]+\.(?:m3u8|mp4)[^"'\s<>]*/i);
-        if (m) return m[0];
+        if (m) return m[0]!!;
         const link = vHtml.match(/"link"\s*:\s*"([^"]+)"/);
-        if (link) return link[1].replace(/\\\//g, '/');
+        if (link) return link[1]!.replace(/\\\//g, '/');
       }
     }
     const botDiv = html.match(/id="botlink"[^>]*>([^<]+)<\/div>/);
-    if (botDiv && botDiv[1]) {
-      let botPath = botDiv[1].trim();
+    if (botDiv && botDiv[1]!) {
+      let botPath = botDiv[1]!.trim();
       if (botPath.startsWith('/')) botPath = botPath.substring(1);
       const botVHtml = await fetchHtml('https://' + botPath, url);
       if (botVHtml) {
@@ -287,19 +287,19 @@ export class EmbedResolver {
 
   private async resolveMp4Upload(html: string, _url: string): Promise<string | null> {
     const direct = html.match(/https?:\/\/a\d+\.mp4upload\.com:\d+\/d\/[a-zA-Z0-9/]+\/video\.mp4/i);
-    if (direct) return direct[0];
+    if (direct) return direct[0]!;
     const legacy = html.match(/https?:\/\/a\d+\.mp4upload\.com:\d+\/d\/[a-zA-Z0-9]+/i);
-    if (legacy) return legacy[0];
+    if (legacy) return legacy[0]!;
     const m3u8 = html.match(/https?:\/\/[^"'\s<>]+\.m3u8[^"'\s<>]*/i);
-    if (m3u8 && !m3u8[0].includes('videojs') && !m3u8[0].includes('css') && !m3u8[0].includes('.js')) return m3u8[0];
+    if (m3u8 && !m3u8[0]!.includes('videojs') && !m3u8[0]!.includes('css') && !m3u8[0]!.includes('.js')) return m3u8[0]!;
     return null;
   }
 
   private async resolveUpstream(html: string, _url: string): Promise<string | null> {
     const m3u8 = html.match(/https?:\/\/[^"'\s<>]+\.m3u8[^"'\s<>]*/i);
-    if (m3u8) return m3u8[0];
+    if (m3u8) return m3u8[0]!!;
     const mp4 = html.match(/https?:\/\/[^"'\s<>]+\.mp4[^"'\s<>]*/i);
-    if (mp4) return mp4[0];
+    if (mp4) return mp4[0]!!;
     return null;
   }
 
@@ -307,33 +307,33 @@ export class EmbedResolver {
     const evalMatch = html.match(/eval\s*\(([^)]+)\)/);
     if (evalMatch) {
       try {
-        const decoded = Buffer.from(evalMatch[1].replace(/['"]/g, ''), 'base64').toString();
+        const decoded = Buffer.from(evalMatch[1]!.replace(/['"]/g, ''), 'base64').toString();
         const m = decoded.match(/https?:\/\/[^"'\\]+\.(?:m3u8|mp4)[^"'\\]*/);
-        if (m) return m[0];
+        if (m) return m[0]!!;
       } catch { /* continue */ }
     }
     const m3u8 = html.match(/https?:\/\/[^"'\s<>]+\.m3u8[^"'\s<>]*/i);
-    if (m3u8) return m3u8[0];
+    if (m3u8) return m3u8[0]!!;
     return null;
   }
 
   private async resolveVidmoly(html: string, _url: string): Promise<string | null> {
     const m3u8 = html.match(/https?:\/\/[^"'\s<>]+\.m3u8[^"'\s<>]*/i);
-    if (m3u8) return m3u8[0];
+    if (m3u8) return m3u8[0]!!;
     const mp4 = html.match(/https?:\/\/[^"'\s<>]+\.mp4[^"'\s<>]*/i);
-    if (mp4) return mp4[0];
+    if (mp4) return mp4[0]!!;
     return null;
   }
 
   private async resolveYourUpload(html: string, _url: string): Promise<string | null> {
     const direct = html.match(/https?:\/\/[^"'\s<>]+\.yourupload\.com\/[^"'\s<>]+\.(?:mp4|m3u8)[^"'\s<>]*/i);
-    if (direct) return direct[0];
+    if (direct) return direct[0]!;
     const fileMatch = html.match(/(?:file|src|source)\s*[:=]\s*["']([^"']+\.(?:mp4|m3u8|mkv|webm)[^"']*)["']/i);
-    if (fileMatch && fileMatch[1].startsWith('http')) return fileMatch[1];
+    if (fileMatch && fileMatch[1]!.startsWith('http')) return fileMatch[1]!;
     const mp4 = html.match(/https?:\/\/[^"'\s<>]+\.mp4[^"'\s<>]*/i);
-    if (mp4 && !mp4[0].includes('novideo')) return mp4[0];
+    if (mp4 && !mp4[0]!.includes('novideo')) return mp4[0]!;
     const m3u8 = html.match(/https?:\/\/[^"'\s<>]+\.m3u8[^"'\s<>]*/i);
-    if (m3u8) return m3u8[0];
+    if (m3u8) return m3u8[0]!!;
     return null;
   }
 
@@ -342,18 +342,18 @@ export class EmbedResolver {
     const re = /<script[^>]*>([\s\S]*?)<\/script>/gi;
     let m;
     while ((m = re.exec(html)) !== null) {
-      if (m[1].length > 10) scripts.push(m[1]);
+      if (m[1]!.length > 10) scripts.push(m[1]!);
     }
     for (const script of scripts) {
       if (!script.includes('jwplayer') && !script.includes('sources') && !script.includes('playlist')) continue;
 
       const fileMatch = script.match(/["']file["']\s*:\s*["']([^"']+\.(?:m3u8|mp4)[^"']*)["']/i);
-      if (fileMatch) return fileMatch[1];
+      if (fileMatch) return fileMatch[1]!;
 
       const setupMatch = script.match(/jwplayer\s*\(\s*["'][^"']*["']\s*\)\s*\.\s*setup\s*\(\s*(\{[\s\S]*?\})\s*\)\s*;/);
       if (setupMatch) {
         try {
-          const config = JSON.parse(setupMatch[1].replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3').replace(/'/g, '"'));
+          const config = JSON.parse(setupMatch[1]!.replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3').replace(/'/g, '"'));
           if (config.sources && Array.isArray(config.sources)) {
             const sorted = config.sources.filter((s: { file?: string; label?: string }) => s.file).sort((a: { label?: string }, b: { label?: string }) => {
               const aLabel = (a.label || '').match(/(\d+)/);
@@ -390,7 +390,7 @@ export class EmbedResolver {
 
     const iframeMatch = html.match(/<iframe[^>]+src=["']([^"']+)["']/i);
     if (iframeMatch) {
-      const iframeUrl = iframeMatch[1].startsWith('//') ? 'https:' + iframeMatch[1] : iframeMatch[1];
+      const iframeUrl = iframeMatch[1]!.startsWith('//') ? 'https:' + iframeMatch[1]! : iframeMatch[1]!;
       if (iframeUrl !== embedUrl && iframeUrl !== referer) {
         const result = await this.resolve(iframeUrl, embedUrl);
         return result.directUrl;

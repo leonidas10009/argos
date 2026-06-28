@@ -381,7 +381,7 @@ export class SmartAnalyzer {
     }
 
     results.sort((a, b) => b.score - a.score);
-    const best = results[0];
+    const best = results[0]!;
 
     const intent: ElementIntent = best && best.score >= 35
       ? { action: best.action, confidence: best.score, signals: best.signals }
@@ -490,7 +490,7 @@ export class SmartAnalyzer {
       }
 
       // Factor 10: Patrones de clase CSS aprendidos
-      const cls = (el.class || '').split(/\s+/)[0];
+      const cls = (el.class || '').split(/\s+/)[0]!;
       if (cls) {
         const classBoost = memory.getClassBoost(cls);
         if (classBoost > 0) {
@@ -902,7 +902,7 @@ export class SmartAnalyzer {
     if (knownServers[domain]) return knownServers[domain];
 
     const parts = domain.replace(/^www\.|^embed\.|^player\.|^cdn\.|^api\.|^static\./i, '').split('.');
-    const main = parts.length > 1 ? parts[parts.length - 2] : parts[0];
+    const main = parts.length > 1 ? parts[parts.length - 2]! : parts[0]!;
 
     // Capitalizar primera letra
     return main.charAt(0).toUpperCase() + main.slice(1).slice(0, 24);
@@ -963,7 +963,7 @@ export class SmartAnalyzer {
     try {
       const path = new URL(url).pathname;
       const match = path.match(/\.([a-z0-9]{2,5})($|\?)/i);
-      return match ? match[1] : '';
+      return match ? match[1]! : '';
     } catch {
       return '';
     }
@@ -1008,7 +1008,7 @@ export class SmartAnalyzer {
     // Ordenar patrones por frecuencia
     const sortedPatterns = [...pathPatterns.entries()]
       .filter(([, count]) => count >= 2)
-      .sort((a, b) => b[1] - a[1]);
+      .sort((a, b) => b[1]! - a[1]!);
 
     // Generar candidatos para cada patron
     for (const [pattern, count] of sortedPatterns) {

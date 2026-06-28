@@ -56,8 +56,8 @@ export class SkeletonDetector {
     const texts = new Set<string>();
 
     // Interseccion: elementos que aparecen en TODAS las paginas
-    const first = fps[0];
-    const second = fps[1];
+    const first = fps[0]!;
+    const second = fps[1]!;
 
     for (const sel of first.selectors) {
       if (second.selectors.has(sel) && fps.every(f => f.selectors.has(sel))) {

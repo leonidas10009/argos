@@ -43,13 +43,13 @@ export class PaginatedCategoryScraper {
   detectPattern(url: string, body?: string): PaginationDetection {
     const suffixMatch = url.match(/^(.+?)(?:_(\d+))?\.html$/i);
     if (suffixMatch) {
-      const base = suffixMatch[1] + '.html';
+      const base = suffixMatch[1]! + '.html';
       return {
         pattern: 'suffix-counter',
-        baseUrl: suffixMatch[2] ? new URL(base, url).href : url,
-        currentPage: parseInt(suffixMatch[2] || '1'),
+        baseUrl: suffixMatch[2]! ? new URL(base, url).href : url,
+        currentPage: parseInt(suffixMatch[2]! || '1'),
         totalPages: this.extractTotalPages(body, 'suffix-counter'),
-        pageUrlTemplate: suffixMatch[1] + '_{page}.html',
+        pageUrlTemplate: suffixMatch[1]! + '_{page}.html',
       };
     }
 
@@ -59,7 +59,7 @@ export class PaginatedCategoryScraper {
       return {
         pattern: 'query-param',
         baseUrl: base,
-        currentPage: parseInt(qpMatch[1]),
+        currentPage: parseInt(qpMatch[1]!),
         totalPages: this.extractTotalPages(body, 'query-param'),
         pageUrlTemplate: base + (base.includes('?') ? '&page={page}' : '?page={page}'),
       };
@@ -71,7 +71,7 @@ export class PaginatedCategoryScraper {
       return {
         pattern: 'path-segment',
         baseUrl: base,
-        currentPage: parseInt(psMatch[1]),
+        currentPage: parseInt(psMatch[1]!),
         totalPages: this.extractTotalPages(body, 'path-segment'),
         pageUrlTemplate: base + '/page/{page}/',
       };
@@ -165,13 +165,13 @@ export class PaginatedCategoryScraper {
     if (!body) return null;
 
     if (pattern === 'suffix-counter') {
-      const matches = [...body.matchAll(/_(\d+)\.html/gi)].map(m => parseInt(m[1]));
+      const matches = [...body.matchAll(/_(\d+)\.html/gi)].map(m => parseInt(m[1]!));
       if (matches.length > 0) return Math.max(...matches);
     }
 
     const pagTexts = [...body.matchAll(/pagina\s*(\d+)\s*(?:de|of|\/)\s*(\d+)/gi)];
     for (const m of pagTexts) {
-      return parseInt(m[2]);
+      return parseInt(m[2]!);
     }
 
     return null;

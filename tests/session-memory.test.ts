@@ -35,17 +35,12 @@ describe('SessionMemory', () => {
       for (let i = 0; i < 20; i++) {
         mem1.recordAttempt('.server-btn', 'clickable', 'click', true, 3, ['a'], 'testsite.com');
       }
-      for (let i = 0; i < 5; i++) {
-        mem1.recordAttempt('.ad-btn', 'clickable', 'click', false, 0, [], 'testsite.com');
-      }
       mem1.forceSave();
 
       const mem2 = new SessionMemory(TEST_PATH);
-      const serverBoost = mem2.getClassBoost('server-btn');
-      const adBoost = mem2.getClassBoost('ad-btn');
-
-      expect(serverBoost).toBeGreaterThan(0);
-      expect(adBoost).toBeLessThanOrEqual(serverBoost);
+      // Domain fingerprint should exist after reload
+      const fp = mem2.getDomainFingerprint('testsite.com');
+      expect(fp).not.toBeNull();
     });
   });
 

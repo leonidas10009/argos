@@ -63,7 +63,7 @@ export async function extractServerList(page: Page): Promise<ServerListResult | 
         servers.push({
           number: (li.querySelector('.numero') || {}).textContent || '',
           name: (li.querySelector('.nombre-server') || {}).textContent || '',
-          url: urlMatch ? urlMatch[1] : ''
+          url: urlMatch ? urlMatch[1]! : ''
         });
       }
 
@@ -72,7 +72,7 @@ export async function extractServerList(page: Page): Promise<ServerListResult | 
       if (downloadBtn) {
         var dOnclick = downloadBtn.getAttribute('onclick') || '';
         var dMatch = dOnclick.match(/window\\\\.open\\(['"]([^'"]+)['"]/);
-        downloadUrl = dMatch ? dMatch[1] : '';
+        downloadUrl = dMatch ? dMatch[1]! : '';
       }
 
       var title = (lista.querySelector('h2') || {}).textContent || '';
@@ -113,7 +113,7 @@ export async function extractServerList(page: Page): Promise<ServerListResult | 
   if (initialData.hasLanguages) {
     const langButtons = await page.$$('.boton-idioma');
     for (let i = 0; i < langButtons.length; i++) {
-      const btn = langButtons[i];
+      const btn = langButtons[i]!;
       const isActive = await page.evaluate(`(function() {
         var el = document.querySelectorAll('.boton-idioma')[${i}];
         return el ? el.className.indexOf('active') !== -1 : false;
@@ -136,7 +136,7 @@ export async function extractServerList(page: Page): Promise<ServerListResult | 
           servers.push({
             number: (li.querySelector('.numero') || {}).textContent || '',
             name: (li.querySelector('.nombre-server') || {}).textContent || '',
-            url: urlMatch ? urlMatch[1] : ''
+            url: urlMatch ? urlMatch[1]! : ''
           });
         }
         var downloadBtn = lista.querySelector('#download-btn');
@@ -144,7 +144,7 @@ export async function extractServerList(page: Page): Promise<ServerListResult | 
         if (downloadBtn) {
           var dOnclick = downloadBtn.getAttribute('onclick') || '';
           var dMatch = dOnclick.match(/window\\\\.open\\(['"]([^'"]+)['"]/);
-          downloadUrl = dMatch ? dMatch[1] : '';
+          downloadUrl = dMatch ? dMatch[1]! : '';
         }
         var title = (lista.querySelector('h2') || {}).textContent || '';
         return { servers: servers, downloadUrl: downloadUrl, title: title };

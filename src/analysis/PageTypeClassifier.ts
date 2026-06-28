@@ -31,8 +31,8 @@ export class PageTypeClassifier {
     const cardClasses = this.findRepeatingClasses(elements, 4);
     if (cardClasses.length > 0) {
       listingScore += 30;
-      signals.push(`cards:${cardClasses[0]}`);
-      keyElements.push({ type: 'card-grid', selector: '.' + cardClasses[0], label: cardClasses[0], count: this.countByClass(elements, cardClasses[0]) });
+      signals.push(`cards:${cardClasses[0]!}`);
+      keyElements.push({ type: 'card-grid', selector: '.' + cardClasses[0]!, label: cardClasses[0]!, count: this.countByClass(elements, cardClasses[0]!) });
     }
 
     // Muchos links de navegacion
@@ -57,7 +57,7 @@ export class PageTypeClassifier {
     if (episodePattern.length >= 3) {
       detailScore += 40;
       signals.push(`episodes:${episodePattern.length}`);
-      keyElements.push({ type: 'episode-list', selector: episodePattern[0].parent || 'ul', label: 'Episodes', count: episodePattern.length });
+      keyElements.push({ type: 'episode-list', selector: episodePattern[0]!.parent || 'ul', label: 'Episodes', count: episodePattern.length });
     }
 
     // Sinopsis larga
@@ -96,7 +96,7 @@ export class PageTypeClassifier {
     if (serverButtons.length >= 2) {
       contentScore += 30;
       signals.push(`servers:${serverButtons.length}`);
-      keyElements.push({ type: 'server-buttons', selector: serverButtons[0].selector, label: 'Servers', count: serverButtons.length });
+      keyElements.push({ type: 'server-buttons', selector: serverButtons[0]!.selector, label: 'Servers', count: serverButtons.length });
     }
 
     // Boton de descarga
@@ -129,7 +129,7 @@ export class PageTypeClassifier {
       { type: 'search' as PageType, score: searchScore },
     ];
     scores.sort((a, b) => b.score - a.score);
-    const best = scores[0];
+    const best = scores[0]!;
 
     let type: PageType = 'unknown';
     let confidence = 0;
@@ -163,7 +163,7 @@ export class PageTypeClassifier {
     }
     return [...classCounts.entries()]
       .filter(([, count]) => count >= minRepeats)
-      .sort((a, b) => b[1] - a[1])
+      .sort((a, b) => b[1]! - a[1]!)
       .slice(0, 5)
       .map(([cls]) => cls);
   }

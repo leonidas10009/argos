@@ -436,7 +436,7 @@ export class SessionMemory {
       // Reemplazar el ultimo segmento de texto con {slug}
       const parts = pattern.split('/').filter(Boolean);
       if (parts.length >= 1) {
-        const last = parts[parts.length - 1];
+        const last = parts[parts.length - 1]!;
         if (!last.includes('{') && !/^\d+$/.test(last)) {
           parts[parts.length - 1] = '{slug}';
         }
@@ -492,7 +492,7 @@ export class SessionMemory {
     const fp = this.domainFingerprints.get(domain);
     if (!fp) return [];
     return Object.entries(fp.successfulClasses)
-      .sort((a, b) => b[1] - a[1])
+      .sort((a, b) => b[1]! - a[1]!)
       .slice(0, limit)
       .map(([k]) => k);
   }
@@ -527,7 +527,7 @@ export class SessionMemory {
         currentFingerprint = {
           domain: this.lastDomain,
           topClasses: Object.entries(fp.successfulClasses)
-            .sort((a, b) => b[1] - a[1])
+            .sort((a, b) => b[1]! - a[1]!)
             .slice(0, 5)
             .map(([k]) => k),
           successRate: this.getCurrentDomainSuccessRate(),
@@ -591,11 +591,11 @@ export class SessionMemory {
 
   private extractClass(selector: string): string {
     const classMatch = selector.match(/\.([a-zA-Z_][\w-]*)/);
-    if (classMatch) return classMatch[1];
+    if (classMatch) return classMatch[1]!;
     const idMatch = selector.match(/#([a-zA-Z_][\w-]*)/);
-    if (idMatch) return idMatch[1];
+    if (idMatch) return idMatch[1]!;
     const childMatch = selector.match(/>\s*(\w+)/);
-    if (childMatch) return childMatch[1];
+    if (childMatch) return childMatch[1]!;
     return '';
   }
 
@@ -607,8 +607,8 @@ export class SessionMemory {
     if (lower.includes('-')) {
       const parts = lower.split('-');
       if (parts.length === 2) {
-        result.push(`*-${parts[1]}`);          // logo-list → *-list
-        result.push(`${parts[0]}-*`);          // logo-list → logo-*
+        result.push(`*-${parts[1]!}`);          // logo-list → *-list
+        result.push(`${parts[0]!}-*`);          // logo-list → logo-*
       }
     }
 
@@ -734,16 +734,16 @@ function levenshtein(a: string, b: string): number {
   const m = a.length;
   const n = b.length;
   const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
-  for (let i = 0; i <= m; i++) dp[i][0] = i;
-  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 0; i <= m; i++) dp[i]![0] = i;
+  for (let j = 0; j <= n; j++) dp[0]![j] = j;
   for (let i = 1; i <= m; i++) {
     for (let j = 1; j <= n; j++) {
-      dp[i][j] = a[i - 1] === b[j - 1]
-        ? dp[i - 1][j - 1]
-        : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+      dp[i]![j] = a[i - 1] === b[j - 1]
+        ? dp[i - 1]![j - 1]!
+        : 1 + Math.min(dp[i - 1]![j]!, dp[i]![j - 1]!, dp[i - 1]![j - 1]!);
     }
   }
-  return dp[m][n];
+  return dp[m]![n]!;
 }
 
 function tokenize(text: string): string[] {

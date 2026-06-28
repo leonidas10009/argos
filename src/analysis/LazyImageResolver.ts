@@ -78,7 +78,7 @@ export class LazyImageResolver {
           const style = div.getAttribute('style') || '';
           const bgMatch = style.match(/background(?:-image)?\s*:\s*url\(["']?([^"')]+)["']?\)/i);
           if (bgMatch) {
-            const url = bgMatch[1];
+            const url = bgMatch[1]!;
             const isPH = placeholders.some((p: string) => url.toLowerCase().includes(p));
             if (skip && isPH) return;
             candidates.push({
