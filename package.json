@@ -1,11 +1,11 @@
 {
-  "name": "sistem-scraper-lite",
+  "name": "argos",
   "version": "3.4.0",
-  "description": "Sistema de escrapeo profesional híbrido (Cheerio → Iframe → Puppeteer) con pool de browsers, stealth, proxy rotativo y concurrencia",
+  "description": "Argos — Motor de escrapeo inteligente híbrido (Cheerio → Iframe → Puppeteer) con pool de browsers, stealth, proxy rotativo, memoria bayesiana y pipeline multi-provider",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "scraper": "./dist/cli.js"
+    "argos": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc",
@@ -16,10 +16,19 @@
   },
   "keywords": [
     "scraper",
+    "scraping",
     "puppeteer",
     "cheerio",
     "stealth",
-    "proxy"
+    "proxy",
+    "autonomous",
+    "depth-first",
+    "bayesian",
+    "embed-resolver",
+    "circuit-breaker",
+    "manga",
+    "anime",
+    "video"
   ],
   "license": "MIT",
   "dependencies": {

@@ -7,9 +7,9 @@ import type { ScraperConfig, StrategyName, LogLevel, ProviderConfig } from './ty
 const program = new Command();
 
 program
-  .name('scraper')
-  .description('Sistema de escrapeo profesional hibrido v3.2')
-  .version('3.2.0');
+  .name('argos')
+  .description('Argos — Motor de escrapeo inteligente v3.4')
+  .version('3.4.0');
 
 program
   .command('scrape <url>')
