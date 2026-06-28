@@ -1,6 +1,6 @@
 import type { Page } from 'puppeteer';
 import { getLogger } from '../utils/logger';
-import { SmartAnalyzer } from './SmartAnalyzer';
+import { SmartAnalyzer, KNOWN_SERVER_NAMES } from './SmartAnalyzer';
 import { DebugViewer } from './DebugViewer';
 import { SessionMemory, textSimilarity } from './SessionMemory';
 import { DynamicPageHandler } from './DynamicPageHandler';
@@ -359,7 +359,9 @@ export class AutonomousScraper {
         if (this.shouldSkipElement(group.selector, 'group', group.labels.join(','))) continue;
 
         await this.logStep('group', group.selector, `Grupo: ${group.labels.slice(0, 5).join(', ')}`);
-        const isServerGroup = /server|servidor|opcion|mirror|source|video|player|descarg|download|idioma|language/i.test(group.label + group.labels.join(' '));
+        const groupText = group.label + group.labels.join(' ');
+        const isServerGroup = /server|servidor|opcion|mirror|source|video|player|descarg|download|idioma|language/i.test(groupText)
+          || group.labels.some(l => [...KNOWN_SERVER_NAMES].some(n => l.toLowerCase().includes(n.toLowerCase())));
         let groupHadSuccess = false;
 
         for (const item of group.items.slice(0, isServerGroup ? (pageAnalysis.type === 'content' ? 6 : 4) : (pageAnalysis.type === 'content' ? 0 : 2))) {

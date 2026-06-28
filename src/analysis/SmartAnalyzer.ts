@@ -158,127 +158,21 @@ const ACTION_PATTERNS: Record<ElementAction, { words: RegExp[]; classPatterns: R
   },
 };
 
-const URL_DOMAIN_KB: Record<string, { type: URLType; isContainer: boolean }> = {
-  'streamtape.com': { type: 'embed', isContainer: true },
-  'streamtape.net': { type: 'embed', isContainer: true },
-  'uqload.com': { type: 'embed', isContainer: true },
-  'uqload.co': { type: 'embed', isContainer: true },
-  'ok.ru': { type: 'embed', isContainer: true },
-  'mega.nz': { type: 'download', isContainer: true },
-  'mega.co.nz': { type: 'download', isContainer: true },
-  'yourupload.com': { type: 'embed', isContainer: true },
-  'swhoi.com': { type: 'embed', isContainer: true },
-  'netu.tv': { type: 'embed', isContainer: true },
-  'netu.io': { type: 'embed', isContainer: true },
-  'filemoon.sx': { type: 'embed', isContainer: true },
-  'filemoon.to': { type: 'embed', isContainer: true },
-  'streamwish.to': { type: 'embed', isContainer: true },
-  'embedwish.com': { type: 'embed', isContainer: true },
-  'cdnwish.com': { type: 'cdn', isContainer: false },
-  'hgcloud.to': { type: 'embed', isContainer: true },
-  'bysekoze.com': { type: 'embed', isContainer: true },
-  'hqq.tv': { type: 'embed', isContainer: true },
-  'hqq.watch': { type: 'embed', isContainer: true },
-  'nyuu.streamhj.top': { type: 'embed', isContainer: true },
-  'multiplayer.streamhj.top': { type: 'embed', isContainer: true },
-  'descargas.streamhj.top': { type: 'download', isContainer: true },
-  'descargas.henaojara.com': { type: 'download', isContainer: true },
-  'discord.com': { type: 'social', isContainer: false },
-  'discord.gg': { type: 'social', isContainer: false },
-  'telegram.me': { type: 'social', isContainer: false },
-  't.me': { type: 'social', isContainer: false },
-  'facebook.com': { type: 'social', isContainer: false },
-  'instagram.com': { type: 'social', isContainer: false },
-  'twitter.com': { type: 'social', isContainer: false },
-  'x.com': { type: 'social', isContainer: false },
-  'youtube.com': { type: 'direct-video', isContainer: false },
-  'youtu.be': { type: 'direct-video', isContainer: false },
-  'google.com': { type: 'tracking', isContainer: false },
-  'googletagmanager.com': { type: 'tracking', isContainer: false },
-  'doubleclick.net': { type: 'tracking', isContainer: false },
-  'googlesyndication.com': { type: 'tracking', isContainer: false },
-  'cloudflare.com': { type: 'cdn', isContainer: false },
-  'jsdelivr.net': { type: 'cdn', isContainer: false },
-  'cdnjs.com': { type: 'cdn', isContainer: false },
-  'unpkg.com': { type: 'cdn', isContainer: false },
-
-  // ─── Extended from ovnivers (+55 dominios) ───
-  'mp4upload.com': { type: 'embed', isContainer: true },
-  'dood.so': { type: 'embed', isContainer: true },
-  'dood.ws': { type: 'embed', isContainer: true },
-  'dood.wf': { type: 'embed', isContainer: true },
-  'dood.re': { type: 'embed', isContainer: true },
-  'dood.sh': { type: 'embed', isContainer: true },
-  'dood.la': { type: 'embed', isContainer: true },
-  'dood.to': { type: 'embed', isContainer: true },
-  'dood.pm': { type: 'embed', isContainer: true },
-  'dood.yt': { type: 'embed', isContainer: true },
-  'mixdrop.co': { type: 'embed', isContainer: true },
-  'mixdrop.ag': { type: 'embed', isContainer: true },
-  'mixdrop.vc': { type: 'embed', isContainer: true },
-  'mixdrop.to': { type: 'embed', isContainer: true },
-  'mixdrop.ch': { type: 'embed', isContainer: true },
-  'mixdrop.gl': { type: 'embed', isContainer: true },
-  'voe.sx': { type: 'embed', isContainer: true },
-  'voe.su': { type: 'embed', isContainer: true },
-  'vidhide.com': { type: 'embed', isContainer: true },
-  'vidmoly.to': { type: 'embed', isContainer: true },
-  'vidmoly.net': { type: 'embed', isContainer: true },
-  'vidpro.com': { type: 'embed', isContainer: true },
-  'vidguard.net': { type: 'embed', isContainer: true },
-  'upstream.to': { type: 'embed', isContainer: true },
-  'uptostream.to': { type: 'embed', isContainer: true },
-  'uptobox.com': { type: 'embed', isContainer: true },
-  'vidoza.net': { type: 'embed', isContainer: true },
-  'vidozahd.com': { type: 'embed', isContainer: true },
-  'vidlox.me': { type: 'embed', isContainer: true },
-  'vidlox.tv': { type: 'embed', isContainer: true },
-  'vidlox.net': { type: 'embed', isContainer: true },
-  'vidfast.co': { type: 'embed', isContainer: true },
-  'sendvid.com': { type: 'embed', isContainer: true },
-  'fembed.com': { type: 'embed', isContainer: true },
-  'fembed.net': { type: 'embed', isContainer: true },
-  'feurl.com': { type: 'embed', isContainer: true },
-  'burstcloud.cc': { type: 'embed', isContainer: true },
-  'burstcloud.to': { type: 'embed', isContainer: true },
-  'gounlimited.to': { type: 'embed', isContainer: true },
-  'hydrax.net': { type: 'embed', isContainer: true },
-  'playhydrax.com': { type: 'embed', isContainer: true },
-  'sbembed.com': { type: 'embed', isContainer: true },
-  'sbembed1.com': { type: 'embed', isContainer: true },
-  'sbplay.org': { type: 'embed', isContainer: true },
-  'sbplay1.com': { type: 'embed', isContainer: true },
-  'sbplay2.com': { type: 'embed', isContainer: true },
-  'sbplay3.com': { type: 'embed', isContainer: true },
-  'streamlare.com': { type: 'embed', isContainer: true },
-  'wolfmax4k.com': { type: 'embed', isContainer: true },
-  'vudeo.net': { type: 'embed', isContainer: true },
-  'sfastwish.com': { type: 'embed', isContainer: true },
-  'flaswish.com': { type: 'embed', isContainer: true },
-  'jawcloud.co': { type: 'embed', isContainer: true },
-  'jaw.cloud': { type: 'embed', isContainer: true },
-  'tapecontent.net': { type: 'embed', isContainer: true },
-  'stpete.net': { type: 'embed', isContainer: true },
-  'mystream.to': { type: 'embed', isContainer: true },
-
-  // Anime sites
-  'animejara.com': { type: 'navigation', isContainer: true },
-  'henaojara.com': { type: 'navigation', isContainer: true },
-  'tioanime.com': { type: 'navigation', isContainer: true },
-  'animeflv.net': { type: 'navigation', isContainer: true },
-  'jkanime.net': { type: 'navigation', isContainer: true },
-
-  // Download/file hosts
-  'mediafire.com': { type: 'download', isContainer: true },
-  'drive.google.com': { type: 'download', isContainer: true },
-  'dropbox.com': { type: 'download', isContainer: true },
-  '1fichier.com': { type: 'download', isContainer: true },
-  'zippyshare.com': { type: 'download', isContainer: true },
-
-  'dailymotion.com': { type: 'embed', isContainer: true },
-  'vimeo.com': { type: 'embed', isContainer: true },
-  'vidcloud.tv': { type: 'embed', isContainer: true },
-};
+/**
+ * Known server/hoster NAMES (no URLs).
+ * Used for detecting server groups in button/link text.
+ * Purely a reference library — the scraper matches these against page content.
+ */
+export const KNOWN_SERVER_NAMES = new Set([
+  'StreamTape', 'StreamWish', 'Filemoon', 'DoodStream', 'MixDrop',
+  'VOE', 'VidHide', 'VidMoly', 'UpStream', 'UpToBox', 'Vidoza',
+  'VidLox', 'VidFast', 'SendVid', 'Fembed', 'BurstCloud', 'GoUnlimited',
+  'Hydrax', 'SBEmbed', 'SBPlay', 'MyStream', 'CloudVideo', 'JawCloud',
+  'WolfMax4K', 'StreamLare', 'Vudeo', 'TapeContent', 'CDNWish', 'EmbedWish',
+  'MP4Upload', 'Netu', 'HQQ', 'OKru', 'MEGA', 'YourUpload', 'Uqload',
+  'Google Drive', 'Dropbox', 'MediaFire', 'ZippyShare', '1Fichier',
+  'YouTube', 'Dailymotion', 'Vimeo',
+]);
 
 const ZONE_PATTERNS: Record<PageZoneType, { classPatterns: RegExp[]; tagPatterns: RegExp[]; attrPatterns: RegExp[] }> = {
   'header': {
@@ -528,13 +422,36 @@ export class SmartAnalyzer {
     const path = this.extractPath(url);
     const ext = this.extractExtension(url);
 
-    // Señal 1: Base de conocimiento de dominios
-    const known = URL_DOMAIN_KB[domain] || URL_DOMAIN_KB[this.getBaseDomain(domain)];
-    if (known) {
-      type = known.type;
-      isContainer = known.isContainer;
-      confidence = 85;
-      signals.push(`kb:${domain}`);
+    // Señal 1: Heuristicas de dominio (subdominios, puertos, TLDs)
+    const domainLower = domain.toLowerCase();
+    // Subdominios que indican embed/player/cdn
+    if (/^(embed|player|video|stream|cdn|media|static|files|assets|img|image|download|descarg)\./.test(domainLower)) {
+      if (/embed|player|video|stream/.test(domainLower.split('.')[0] || '')) {
+        type = 'embed';
+        isContainer = true;
+        confidence = Math.max(confidence, 75);
+      } else if (/cdn|static|files|assets|img|image/.test(domainLower.split('.')[0] || '')) {
+        type = 'cdn';
+        confidence = Math.max(confidence, 70);
+      } else if (/download|descarg/.test(domainLower.split('.')[0] || '')) {
+        type = 'download';
+        confidence = Math.max(confidence, 70);
+      }
+      signals.push(`subdomain:${domainLower.split('.')[0]}`);
+    }
+    // Puertos comunes de servidores de medios
+    if (/:(\d{4,5})/.test(lowerUrl)) {
+      const port = parseInt(lowerUrl.match(/:(\d{4,5})/)![1]!);
+      if (port >= 8000 && port <= 9999) {
+        if (type === 'unknown') type = 'embed';
+        confidence = Math.max(confidence, 60);
+        signals.push(`port:${port}`);
+      }
+    }
+    // TLDs frecuentes en servicios de hosting/embed
+    if (/\.(tv|to|cc|me|xyz|top|click)$/i.test(domainLower) && type === 'unknown') {
+      confidence = Math.max(confidence, 40);
+      signals.push('tld:alt');
     }
 
     // Señal 2: Extension de archivo
@@ -793,102 +710,9 @@ export class SmartAnalyzer {
   // ============================================================
 
   inferServerName(domain: string): string {
-    const knownServers: Record<string, string> = {
-      'streamtape.com': 'StreamTape',
-      'streamtape.net': 'StreamTape',
-      'yourupload.com': 'YourUpload',
-      'mega.nz': 'MEGA',
-      'mega.co.nz': 'MEGA',
-      'ok.ru': 'OK.ru',
-      'uqload.com': 'Uqload',
-      'uqload.co': 'Uqload',
-      'hqq.tv': 'HQQ',
-      'hqq.watch': 'HQQ',
-      'bysekoze.com': 'BySekoze',
-      'swhoi.com': 'SWHOI',
-      'filemoon.sx': 'Filemoon',
-      'filemoon.to': 'Filemoon',
-      'streamwish.to': 'StreamWish',
-      'embedwish.com': 'EmbedWish',
-      'cdnwish.com': 'CDNWish',
-      'hgcloud.to': 'HGCloud',
-      'netu.tv': 'Netu',
-      'netu.io': 'Netu',
-      'youtube.com': 'YouTube',
-      'youtu.be': 'YouTube',
-      'dailymotion.com': 'Dailymotion',
-      'vimeo.com': 'Vimeo',
-      'drive.google.com': 'Google Drive',
-      'dropbox.com': 'Dropbox',
-      'mediafire.com': 'MediaFire',
-      'zippyshare.com': 'ZippyShare',
-      '1fichier.com': '1Fichier',
-      'sendvid.com': 'SendVid',
-      'vidlox.me': 'VidLox',
-      'vidoza.net': 'Vidoza',
-      'vidfast.co': 'VidFast',
-      'upstream.to': 'UpStream',
-      'burstcloud.cc': 'BurstCloud',
-      'burstcloud.to': 'BurstCloud',
-      'gounlimited.to': 'GoUnlimited',
-      'mixdrop.co': 'MixDrop',
-      'mixdrop.ag': 'MixDrop',
-      'fembed.com': 'Fembed',
-      'fembed.net': 'Fembed',
-      'feurl.com': 'Fembed',
-      'playhydrax.com': 'Hydrax',
-      'hydrax.net': 'Hydrax',
-      'cloudvideo.tv': 'CloudVideo',
-      'jawcloud.co': 'JawCloud',
-      'sbembed.com': 'SBEmbed',
-      'sbembed1.com': 'SBEmbed',
-      'sbplay.org': 'SBPlay',
-      'sbplay1.com': 'SBPlay',
-      'sbplay2.com': 'SBPlay',
-      'sbplay3.com': 'SBPlay',
-      'mystream.to': 'MyStream',
-      'mp4upload.com': 'MP4Upload',
-      'dood.so': 'DoodStream',
-      'dood.ws': 'DoodStream',
-      'dood.wf': 'DoodStream',
-      'dood.re': 'DoodStream',
-      'dood.sh': 'DoodStream',
-      'dood.la': 'DoodStream',
-      'dood.to': 'DoodStream',
-      'dood.pm': 'DoodStream',
-      'voe.sx': 'VOE',
-      'voe.su': 'VOE',
-      'vidhide.com': 'VidHide',
-      'vidpro.com': 'VidHide',
-      'vidguard.net': 'VidHide',
-      'vidmoly.to': 'VidMoly',
-      'vidmoly.net': 'VidMoly',
-      'mixdrop.vc': 'MixDrop',
-      'mixdrop.to': 'MixDrop',
-      'mixdrop.ch': 'MixDrop',
-      'mixdrop.gl': 'MixDrop',
-      'uptostream.to': 'UpStream',
-      'uptobox.com': 'UpToBox',
-      'vidozahd.com': 'Vidoza',
-      'vidlox.tv': 'VidLox',
-      'vidlox.net': 'VidLox',
-      'streamlare.com': 'StreamLare',
-      'wolfmax4k.com': 'WolfMax4K',
-      'vudeo.net': 'Vudeo',
-      'sfastwish.com': 'StreamWish',
-      'flaswish.com': 'StreamWish',
-      'tapecontent.net': 'TapeContent',
-      'stpete.net': 'StreamTape',
-      'jaw.cloud': 'JawCloud',
-      'vidcloud.tv': 'CloudVideo',
-    };
-
-    if (knownServers[domain]) return knownServers[domain];
-
-    const parts = domain.replace(/^www\.|^embed\.|^player\.|^cdn\.|^api\.|^static\./i, '').split('.');
+    // Purely heuristic: strip subdomain prefixes, extract main domain name, capitalize
+    const parts = domain.replace(/^www\.|^embed\.|^player\.|^cdn\.|^api\.|^static\.|^media\.|^files\.|^img\./i, '').split('.');
     const main = parts.length > 1 ? parts[parts.length - 2]! : parts[0]!;
-
-    // Capitalizar primera letra
     return main.charAt(0).toUpperCase() + main.slice(1).slice(0, 24);
   }
 
