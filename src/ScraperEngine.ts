@@ -487,6 +487,7 @@ export class ScraperEngine {
     log.info('Shutting down ScraperEngine');
     this.memoryWatchdog.stop();
     getProviderMemory().forceSave();
+    getLearnedKB().save();
     if (this.pool) {
       await this.pool.closeAll();
       this.pool = null;
