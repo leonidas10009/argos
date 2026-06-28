@@ -5,7 +5,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green)](https://nodejs.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.5.0-orange)](package.json)
+[![Version](https://img.shields.io/badge/version-3.5.1-orange)](package.json)
 [![Tests](https://img.shields.io/badge/tests-94%20passing-brightgreen)](tests/)
 
 ---
@@ -162,6 +162,7 @@ src/
 | **Embed → URL directa** | 15+ dominios: streamwish, filemoon, doodstream, mixdrop, voe, streamtape... |
 | **Stream normalization** | Quality (4K–CAM), language (ES/EN/JA/KO...), server name, priority scoring |
 | **Lazy image resolver** | `cover_url`, `data-src`, `data-original`, `srcset`, background images |
+| **Batch reader** | Detección genérica de readers con carga por lotes (select "Cargar imágenes: N" + page selector). Extrae todas las imágenes del capítulo. |
 | **Redirect chain follower** | Sigue cadenas afiliadas (ouo.io, linkvertise) + detecta Cloudflare |
 
 ### Producción

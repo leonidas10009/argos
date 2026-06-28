@@ -249,20 +249,40 @@ export class AutonomousScraper extends EventEmitter {
         && /anterior|siguiente|prev|next|recargar|reload|download|descarg/i.test(model.elements.map(e => e.text).join(' '));
       if (isReaderPage) {
         log.debug({ url: pageUrl }, 'Reader page detected — extraction mode');
-        // Extract all visible content URLs (images, iframes, scripts)
-        const readerUrls = await this.extractAllUrls();
-        diffAndCollect(readerUrls, 'reader-content', pageUrl);
-        // Look for pagination within the reader (page-2.html, -2.html, ?page=2)
-        const readerPagination = pageUrlsLocal.filter(u =>
-          /-\d+\.html|page=\d+|#page=\d+/i.test(u) && !visitedPages.has(u)
-        );
-        for (const nextPage of readerPagination.slice(0, 3)) {
-          if (Date.now() - start > MAX_TIME) break;
-          try {
-            await explorePage(nextPage, undefined, depth + 1);
-            visitedPages.add(nextPage.split('?')[0]!.replace(/\/\d+$/, '/X'));
-            await this.dynamic.navigate(pageUrl, { timeout: 10000 });
-          } catch { continue; }
+
+        // Detect batch image loading (e.g., "Cargar imágenes: 1/3/6/10" + sl-page selector)
+        const batchReader = await this.detectBatchReader(pageUrl);
+        if (batchReader) {
+          log.info({ batches: batchReader.batchUrls.length, totalPages: batchReader.totalPages }, 'Batch reader detected');
+          for (let i = 0; i < batchReader.batchUrls.length; i++) {
+            if (Date.now() - start > MAX_TIME) break;
+            const batchUrl = batchReader.batchUrls[i]!;
+            try {
+              await this.dynamic.navigate(batchUrl, { timeout: 15000 });
+              await this.dynamic.triggerLazyElements();
+              const batchUrls = await this.extractAllUrls();
+              const imgCount = batchUrls.filter(u => /\.(webp|jpg|jpeg|png|avif)(\?|$)/i.test(u)).length;
+              diffAndCollect(batchUrls, `reader-batch-${i + 1}`, batchUrl);
+              log.info({ batch: i + 1, images: imgCount }, 'Batch extracted');
+            } catch (err) {
+              log.debug({ batch: i + 1, error: (err as Error).message }, 'Batch failed');
+            }
+          }
+        } else {
+          // Fallback: extract current page + follow pagination
+          const readerUrls = await this.extractAllUrls();
+          diffAndCollect(readerUrls, 'reader-content', pageUrl);
+          const readerPagination = pageUrlsLocal.filter(u =>
+            /-\d+\.html|page=\d+|#page=\d+/i.test(u) && !visitedPages.has(u)
+          );
+          for (const nextPage of readerPagination.slice(0, 3)) {
+            if (Date.now() - start > MAX_TIME) break;
+            try {
+              await explorePage(nextPage, undefined, depth + 1);
+              visitedPages.add(nextPage.split('?')[0]!.replace(/\/\d+$/, '/X'));
+              await this.dynamic.navigate(pageUrl, { timeout: 10000 });
+            } catch { continue; }
+          }
         }
         return; // Reader: extract, don't explore other content
       }
@@ -1168,6 +1188,106 @@ export class AutonomousScraper extends EventEmitter {
     return signals[0]!?.goal || 'video';
   }
 
+  private async detectBatchReader(pageUrl: string): Promise<{ batchUrls: string[]; totalPages: number } | null> {
+    const baseUrl = pageUrl.replace(/\/+$/, '');
+
+    // Step 1: read batch size selector to find max batch value
+    const batchInfo = await this.page.evaluate(() => {
+      const selects = document.querySelectorAll('select');
+      let maxBatchSize = 1;
+      let maxBatchValue = '';
+
+      for (let i = 0; i < selects.length; i++) {
+        const s = selects[i]!;
+        const opts = Array.from(s.options);
+        const firstText = (opts[0]?.textContent || '').toLowerCase();
+
+        if (/cargar\s+im[aá]genes|load\s+images|images?\s+per\s+page|batch\s+size|images?\s+at\s+once/i.test(firstText)) {
+          for (const o of opts) {
+            const match = (o.textContent || '').match(/(\d+)/);
+            if (match) {
+              const n = parseInt(match[1]!, 10);
+              if (n > maxBatchSize) {
+                maxBatchSize = n;
+                maxBatchValue = o.value;
+              }
+            }
+          }
+        }
+      }
+
+      return { maxBatchSize, maxBatchValue };
+    });
+
+    if (batchInfo.maxBatchSize <= 1 || !batchInfo.maxBatchValue) return null;
+
+    // Step 2: navigate to max batch URL to see the real page selector
+    const maxBatchUrl = baseUrl + batchInfo.maxBatchValue;
+    try {
+      await this.dynamic.navigate(maxBatchUrl, { timeout: 15000 });
+      await this.dynamic.triggerLazyElements();
+    } catch {
+      return null;
+    }
+
+    // Step 3: read page selector from the batch-loaded page
+    const result = await this.page.evaluate(() => {
+      const selects = document.querySelectorAll('select');
+      let pageSelect: HTMLSelectElement | null = null;
+
+      for (let i = 0; i < selects.length; i++) {
+        const s = selects[i]!;
+        const opts = Array.from(s.options);
+        const firstText = (opts[0]?.textContent || '').toLowerCase();
+
+        // Skip batch size selectors
+        if (/cargar\s+im[aá]genes|load\s+images|images?\s+per\s+page|batch\s+size/i.test(firstText)) continue;
+
+        // Detect by class name
+        if (s.className && (s.className.includes('sl-page') || s.className.includes('page-select') || s.className.includes('pagination'))) {
+          pageSelect = s;
+          break;
+        }
+
+        // Detect by URL pattern: options with batch URLs like -10-1.html, -10-2.html
+        if (!pageSelect && opts.length >= 2) {
+          const firstVal = opts[0]?.value || '';
+          const secondVal = opts[1]?.value || '';
+          if (/-\d+-\d+\.html/i.test(firstVal) && /-\d+-\d+\.html/i.test(secondVal)) {
+            pageSelect = s;
+            break;
+          }
+        }
+
+        // Detect by option text: "1/N", "2/N"
+        if (!pageSelect && opts.length >= 2) {
+          const t1 = opts[0]?.textContent || '';
+          const t2 = opts[1]?.textContent || '';
+          if (/^\d+\/\d+/.test(t1) && /^\d+\/\d+/.test(t2)) {
+            pageSelect = s;
+            break;
+          }
+        }
+      }
+
+      if (!pageSelect) return null;
+
+      const batchUrls: string[] = [];
+      const opts = Array.from(pageSelect.options);
+      for (const o of opts) {
+        const val = o.value;
+        if (val && (val.startsWith('http') || val.startsWith('/'))) {
+          batchUrls.push(val);
+        }
+      }
+
+      return batchUrls.length > 0 ? { batchUrls } : null;
+    });
+
+    if (!result) return null;
+    return { batchUrls: result.batchUrls, totalPages: result.batchUrls.length * batchInfo.maxBatchSize };
+  }
+
   private getContentFilter(): RegExp {
     switch (this.contentGoal) {
       case 'manga':
@@ -1241,6 +1361,30 @@ export class AutonomousScraper extends EventEmitter {
 
       const model = await this.buildModel();
       const pageAnalysis = this.pageClassifier.analyze(model.elements, url, model.title);
+
+      // Reader page: detect batch loading for manga/comic readers
+      const isReaderPage = /\/chapter\/|\/reader\/|\/leer\/|\/capitulo\/|\/episodio\/|\/ver\//i.test(url)
+        && /anterior|siguiente|prev|next|recargar|reload|download|descarg/i.test(model.elements.map(e => e.text).join(' '));
+      if (isReaderPage) {
+        const batchReader = await this.detectBatchReader(url);
+        if (batchReader) {
+          log.info({ batches: batchReader.batchUrls.length }, 'Batch reader detected in quick mode');
+          for (let i = 0; i < batchReader.batchUrls.length; i++) {
+            if (Date.now() - start > QUICK_DEADLINE) break;
+            const batchUrl = batchReader.batchUrls[i]!;
+            try {
+              await this.dynamic.navigate(batchUrl, { timeout: 15000 });
+              await this.dynamic.triggerLazyElements();
+              const batchUrls = await this.extractAllUrls();
+              for (const u of batchUrls) {
+                if (u && u !== 'about:blank' && !AutonomousScraper.AD_DOMAINS.test(u)) {
+                  this.urlCollector.push({ url: u, category: 'reader-batch', source: `batch-${i + 1} | ${url}` });
+                }
+              }
+            } catch { continue; }
+          }
+        }
+      }
 
       const pageUrls = await this.extractAllUrls();
       for (const u of pageUrls) {
