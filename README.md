@@ -5,7 +5,8 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green)](https://nodejs.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.4.0-orange)](package.json)
+[![Version](https://img.shields.io/badge/version-3.4.1-orange)](package.json)
+[![Tests](https://img.shields.io/badge/tests-82%20passing-brightgreen)](tests/)
 
 ---
 
@@ -222,6 +223,51 @@ LOG_LEVEL=info
 | Pino | Logging estructurado |
 | Commander | CLI |
 | dotenv | Configuración por variables de entorno |
+
+---
+
+## Quick Start (ejemplo completo)
+
+```bash
+git clone https://github.com/leonidas10009/argos.git
+cd argos
+npm install
+npm run build
+
+# Escrapeo autónomo de un sitio de anime
+npx tsx src/cli.ts autonomous "https://animejara.com" -q "naruto" -g video
+
+# Mismo resultado vía API
+npx tsx -e "
+const { ScraperEngine } = require('./dist/index.js');
+(async () => {
+  const engine = new ScraperEngine({ headless: true, streamDeadlineMs: 30_000 });
+  await engine.initialize();
+  const result = await engine.autonomousScrape('https://animejara.com', {
+    searchTerm: 'naruto', contentGoal: 'video', maxRequests: 30
+  });
+  console.log('Servidores:', result.serverCatalog.length);
+  console.log('Streams:', result.streams.slice(0, 3).map(s => s.serverName + ' ' + s.quality));
+  await engine.shutdown();
+})();
+"
+
+# Ejecutar tests
+npm test
+```
+
+---
+
+## Solución de problemas
+
+| Problema | Solución |
+|----------|----------|
+| `Error: Engine not initialized` | Llama `await engine.initialize()` antes de cualquier operación |
+| Chrome no encontrado | Instala Chrome o configura `CHROME_PATH` en `.env` |
+| `CircuitOpenError` | El sitio fue bloqueado tras 5 fallos. Espera 5 min o usa `engine.getCircuitStates()` |
+| El scrapeo no encuentra servidores | Prueba con `-g auto` para auto-detectar el tipo de contenido |
+| `npm run build` falla | Verifica Node ≥18: `node -v` |
+| Quiero scrapear sin navegador | Usa `staticAnalyze()` o CLI `static` — ~15MB RAM, sin Chrome |
 
 ---
 
