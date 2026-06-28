@@ -1,7 +1,7 @@
 import * as cheerio from 'cheerio';
 import type { CheerioAPI } from 'cheerio';
 import { SmartAnalyzer } from './SmartAnalyzer';
-import { SessionMemory, textSimilarity } from './SessionMemory';
+import { SessionMemory, textSimilarity, getSessionMemory } from './SessionMemory';
 import type { RawElement } from './types';
 import { getLogger } from '../utils/logger';
 
@@ -39,7 +39,7 @@ export class StaticScraper {
 
   constructor() {
     this.ai = new SmartAnalyzer();
-    this.memory = new SessionMemory();
+    this.memory = getSessionMemory();
   }
 
   async analyze(url: string): Promise<StaticScrapeResult> {

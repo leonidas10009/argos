@@ -1,0 +1,56 @@
+{
+  "domains": {},
+  "selectors": [
+    {
+      "selector": "jhak",
+      "domain": "repelisplus.my",
+      "phase": "group",
+      "successRate": 1,
+      "attempts": 2,
+      "lastUsed": 1782679722181
+    },
+    {
+      "selector": "li.jhak:nth-of-type(1) > a:nth-child(1)",
+      "domain": "repelisplus.my",
+      "phase": "navigate",
+      "successRate": 1,
+      "attempts": 1,
+      "lastUsed": 1782679722181
+    },
+    {
+      "selector": "li.jhak:nth-of-type(2) > a:nth-child(1)",
+      "domain": "repelisplus.my",
+      "phase": "navigate",
+      "successRate": 1,
+      "attempts": 1,
+      "lastUsed": 1782679722181
+    },
+    {
+      "selector": "LI",
+      "domain": "repelisplus.my",
+      "phase": "group",
+      "successRate": 1,
+      "attempts": 1,
+      "lastUsed": 1782679722181
+    },
+    {
+      "selector": "ul.hekzhu > li:nth-child(2) > a:nth-child(1)",
+      "domain": "repelisplus.my",
+      "phase": "navigate",
+      "successRate": 1,
+      "attempts": 1,
+      "lastUsed": 1782679722181
+    },
+    {
+      "selector": "repelisplus.my",
+      "domain": "repelisplus.my",
+      "phase": "dive",
+      "successRate": 1,
+      "attempts": 2,
+      "lastUsed": 1782679722181
+    }
+  ],
+  "patterns": [],
+  "totalDiscoveries": 0,
+  "lastUpdated": 0
+}

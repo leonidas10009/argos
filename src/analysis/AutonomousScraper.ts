@@ -3,7 +3,7 @@ import { EventEmitter } from 'node:events';
 import { getLogger } from '../utils/logger';
 import { SmartAnalyzer, KNOWN_SERVER_NAMES } from './SmartAnalyzer';
 import { DebugViewer } from './DebugViewer';
-import { SessionMemory, textSimilarity } from './SessionMemory';
+import { SessionMemory, textSimilarity, getSessionMemory } from './SessionMemory';
 import { DynamicPageHandler } from './DynamicPageHandler';
 import { PageTypeClassifier } from './PageTypeClassifier';
 import { SkeletonDetector } from './SkeletonDetector';
@@ -114,7 +114,7 @@ export class AutonomousScraper extends EventEmitter {
     if (options?.contentGoal) this.contentGoal = options.contentGoal;
     if (options?.deadlineMs) this.deadlineMs = options.deadlineMs;
     this.ai = new SmartAnalyzer();
-    this.memory = new SessionMemory();
+    this.memory = getSessionMemory();
     this.dynamic = new DynamicPageHandler(page);
     this.streamNormalizer = new StreamNormalizer();
     if (options?.debug) {

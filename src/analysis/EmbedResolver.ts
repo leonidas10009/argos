@@ -1,7 +1,7 @@
 import { getLogger } from '../utils/logger';
 import type { EmbedResult } from '../types';
 import { SmartAnalyzer } from './SmartAnalyzer';
-import { SessionMemory } from './SessionMemory';
+import { SessionMemory, getSessionMemory } from './SessionMemory';
 
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 const EMBED_TIMEOUT = 10000;
@@ -30,7 +30,7 @@ export class EmbedResolver {
 
   constructor() {
     this.ai = new SmartAnalyzer();
-    this.memory = new SessionMemory();
+    this.memory = getSessionMemory();
   }
 
   async resolve(embedUrl: string, referer?: string): Promise<EmbedResult> {
