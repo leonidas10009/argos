@@ -1,6 +1,6 @@
 {
   "name": "argos",
-  "version": "3.4.1",
+  "version": "3.5.0",
   "description": "Argos — Motor de escrapeo inteligente híbrido (Cheerio → Iframe → Puppeteer) con pool de browsers, stealth, proxy rotativo, memoria bayesiana y pipeline multi-provider",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
