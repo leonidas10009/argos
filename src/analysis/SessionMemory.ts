@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { getLogger } from '../utils/logger';
+import { AsyncLock } from '../utils/async-lock';
 
 // ============================================================
 // TIPOS
@@ -87,6 +88,7 @@ export class SessionMemory {
   private totalAttempts = 0;
   private lastDomain = '';
   private persistPath: string;
+  private lock = new AsyncLock();
 
   constructor(persistPath?: string) {
     this.persistPath = persistPath || join(process.cwd(), '.scraper-memory.json');
@@ -190,7 +192,9 @@ export class SessionMemory {
         successCount: this.successCount,
       };
 
-      writeFileSync(this.persistPath, JSON.stringify(data, null, 2));
+      this.lock.runSync(() => {
+        writeFileSync(this.persistPath, JSON.stringify(data, null, 2));
+      });
     } catch (err) {
       getLogger().debug({ error: (err as Error).message }, 'Memory save failed');
     }

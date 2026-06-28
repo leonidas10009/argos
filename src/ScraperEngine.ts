@@ -130,6 +130,7 @@ export class ScraperEngine {
     };
   }
 
+  /** Scrape multiple URLs concurrently using bounded worker pool. */
   async scrapeMultiple(targets: ScrapeTarget[]): Promise<ScrapeResult[]> {
     const log = getLogger();
     log.info({ count: targets.length }, 'Starting concurrent scrape');
@@ -198,6 +199,11 @@ export class ScraperEngine {
     return this.healthMonitor.getProviderScore(providerName);
   }
 
+  /**
+   * Quick single-page scrape — no recursion, ~8-30s. Clicks server buttons
+   * and captures network responses on the current page only.
+   * @returns SmartScrapeResult with 30s deadline
+   */
   async quickScrape(url: string, options?: AutonomousScraperOptions) {
     if (!this.pool) throw new Error('Engine not initialized. Call initialize() first.');
 
@@ -228,6 +234,10 @@ export class ScraperEngine {
     return this.embedResolver.resolveAll(urls, referer);
   }
 
+  /**
+   * Resolve an embed/hoster URL to a direct video URL (m3u8/mp4).
+   * Supports 15+ domains: streamwish, filemoon, doodstream, mixdrop, voe, streamtape...
+   */
   async resolveEmbed(url: string, referer?: string): Promise<EmbedResult> {
     return this.embedResolver.resolve(url, referer);
   }
@@ -291,6 +301,20 @@ export class ScraperEngine {
     }
   }
 
+  /**
+   * Autonomous intelligent scrape — depth-first recursive exploration.
+   * Uses Puppeteer browser to navigate, build semantic models, click elements,
+   * and extract server catalogs without any hardcoded selectors.
+   *
+   * @param url - Target URL to explore
+   * @param options.searchTerm - Primary search query if the page has a search input
+   * @param options.searchTerms - Fallback search terms for progressive matching
+   * @param options.contentGoal - Content type to prioritize (video, manga, image, download, document, auto)
+   * @param options.maxRequests - Max HTTP requests per session (default 50)
+   * @param options.deadlineMs - Hard deadline; returns partial results if exceeded (default 45s)
+   * @param options.debug - Enable visual debug reports with screenshots
+   * @returns SmartScrapeResult with serverCatalog, streams (priority-sorted), findings, and partial flag
+   */
   async autonomousScrape(url: string, options?: AutonomousScraperOptions) {
     if (!this.pool) throw new Error('Engine not initialized. Call initialize() first.');
 
