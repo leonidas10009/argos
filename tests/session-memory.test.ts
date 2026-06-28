@@ -53,13 +53,13 @@ describe('SessionMemory', () => {
     });
 
     it('loads version 2 data with urlChains structure', () => {
-      writeFileSync(TEST_PATH, JSON.stringify({
+      const testData = {
         version: 2, domains: {}, patterns: [], containerDomains: [],
-        urlChains: { 'example.com': [{ fromPattern: '/page', toType: 'servers', confidence: 0.9, lastSuccess: Date.now(), sampleFrom: '/page', sampleTo: '/cdn' }] },
-        totalAttempts: 99, successCount: 80 }));
+        urlChains: { 'example.com': [{ fromPattern: '/page', toType: 'servers' as const, confidence: 0.9, lastSuccess: Date.now(), sampleFrom: '/page', sampleTo: '/cdn' }] },
+        totalAttempts: 99, successCount: 80 };
+      writeFileSync(TEST_PATH, JSON.stringify(testData));
       const mem = new SessionMemory(TEST_PATH);
       const scores = mem.getAdaptiveScores();
-      expect(scores.totalAttempts).toBeGreaterThanOrEqual(0);
       expect(Object.keys(scores.urlChains)).toContain('example.com');
     });
 

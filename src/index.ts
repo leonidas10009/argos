@@ -25,6 +25,7 @@ export { RedirectChainFollower, AFFILIATE_REDIRECT_DOMAINS } from './analysis/Re
 export { PaginatedCategoryScraper } from './analysis/PaginatedCategoryScraper';
 export { Router } from './engines/Router';
 export { StreamPipeline } from './engines/StreamPipeline';
+export { CrossSourceMatcher } from './engines/CrossSourceMatcher';
 export { retry } from './utils/retry';
 export { createLogger } from './utils/logger';
 export { takeScreenshot } from './utils/screenshot';
@@ -101,3 +102,9 @@ export type {
   HealthSummary,
   BayesianScore,
 } from './analysis/HealthMonitor';
+export type {
+  SourceMatch,
+  CrossSourceResult,
+  SearchProvider,
+  CrossSourceOptions,
+} from './engines/CrossSourceMatcher';
