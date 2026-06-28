@@ -10,6 +10,7 @@ const PERSIST_PATH = join(process.cwd(), '.learned-kb.json');
 export class LearnedKB {
   private data: LearnedKnowledgeBase;
   private persistPath: string;
+  private pendingOps = 0;
 
   constructor(persistPath?: string) {
     this.persistPath = persistPath || PERSIST_PATH;
@@ -42,6 +43,7 @@ export class LearnedKB {
       this.data.totalDiscoveries++;
     }
     this.data.lastUpdated = Date.now();
+    this.autoSave();
     getLogger().debug({ domain, type: this.data.domains[domain]?.type }, 'LearnedKB: domain added');
   }
 
@@ -65,11 +67,8 @@ export class LearnedKB {
         lastUsed: Date.now(),
       });
     }
+    this.autoSave();
   }
-
-  /**
-   * Register a discovered pattern from exploration.
-   */
   addPattern(pattern: string, description: string, category: LearnedPattern['category'], example: string): void {
     const existing = this.data.patterns.find(p => p.pattern === pattern && p.category === category);
     if (existing) {
@@ -79,6 +78,7 @@ export class LearnedKB {
       this.data.patterns.push({ pattern, description, confidence: 0.5, examples: [example], category });
     }
     this.data.lastUpdated = Date.now();
+    this.autoSave();
   }
 
   /**
@@ -163,6 +163,13 @@ export class LearnedKB {
       writeFileSync(this.persistPath, JSON.stringify(this.data, null, 2));
     } catch (err) {
       getLogger().debug({ error: (err as Error).message }, 'LearnedKB: save failed');
+    }
+  }
+
+  private autoSave(): void {
+    this.pendingOps++;
+    if (this.pendingOps % 10 === 0) {
+      this.save();
     }
   }
 
