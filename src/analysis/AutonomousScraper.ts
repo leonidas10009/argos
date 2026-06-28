@@ -259,6 +259,22 @@ export class AutonomousScraper extends EventEmitter {
         // En pagina de contenido, buscar iframes y videos ya cargados
         const finalContentUrls = await this.extractAllUrls();
         diffAndCollect(finalContentUrls, 'content-final', pageUrl);
+
+        // Si hay links a player/online, seguirlos (deep-dive)
+        const playerLinks = pageUrlsLocal.filter(u =>
+          /\/online\/|\/watch\/|\/play\/|\/player\/|\/embed\//i.test(u) &&
+          !visitedPages.has(u)
+        );
+        for (const playerUrl of playerLinks.slice(0, 2)) {
+          if (Date.now() - start > MAX_TIME) break;
+          await this.logStep('dive', this.extractDomain(playerUrl), `Player: ${playerUrl.slice(0, 50)}`);
+          try {
+            await explorePage(playerUrl, undefined, depth + 1);
+            visitedPages.add(playerUrl.split('?')[0]!.replace(/\/\d+$/, '/X'));
+            await this.dynamic.navigate(pageUrl, { timeout: 10000 });
+            await this.buildModel();
+          } catch { continue; }
+        }
         return; // No seguir explorando menus en pagina de contenido
       }
 
@@ -420,13 +436,13 @@ export class AutonomousScraper extends EventEmitter {
             return (cls.isContainer && (cls.type === 'embed' || cls.type === 'navigation'))
               || this.memory.isKnownContainerDomain(d);
           })
-          // Priorizar embeds sobre navigation, tomar solo 1
+          // Priorizar player/embeds sobre navigation
           .sort((a, b) => {
-            const aEmb = /embed|player|reproductor|stream|video/i.test(a) ? 0 : 1;
-            const bEmb = /embed|player|reproductor|stream|video/i.test(b) ? 0 : 1;
-            return aEmb - bEmb;
+            const aPlayer = /\/online\/|\/watch\/|\/play\/|\/player\/|\/embed\/|embed|player|reproductor|stream|video/i.test(a) ? 0 : 1;
+            const bPlayer = /\/online\/|\/watch\/|\/play\/|\/player\/|\/embed\/|embed|player|reproductor|stream|video/i.test(b) ? 0 : 1;
+            return aPlayer - bPlayer;
           })
-          .slice(0, 1);
+          .slice(0, 2);
 
         for (const containerUrl of containers) {
           if (Date.now() - start > MAX_TIME) break;

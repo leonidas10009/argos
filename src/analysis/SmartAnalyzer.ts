@@ -476,6 +476,12 @@ export class SmartAnalyzer {
       confidence = Math.max(confidence, 75);
       signals.push('path:embed');
     }
+    if (/\/online\/|\/watch\/|\/play\/|\.php\?/i.test(path)) {
+      if (type === 'unknown') type = 'embed';
+      isContainer = true;
+      confidence = Math.max(confidence, 70);
+      signals.push('path:player');
+    }
     if (/\/download\/|\/descargar\/|\/d\/|\/descarga\/|download\.php|descargar\.php/i.test(path)) {
       if (type === 'unknown') type = 'download';
       confidence = Math.max(confidence, 70);
