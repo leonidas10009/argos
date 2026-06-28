@@ -6,7 +6,6 @@ logs/
 *.log
 .DS_Store
 debug/
-tests/
 .scraper-memory.json
 .provider-memory.json
 MEMORY.md
